@@ -21,7 +21,9 @@ import {
   Upload,
   Search,
   Folder,
-  Plus
+  Plus,
+  LayoutGrid,
+  Grid
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -43,6 +45,7 @@ const isLoaded = ref(false)
 const hasCustomImage = ref(false)
 const showLibraryPicker = ref(false)
 const librarySearch = ref('')
+const pickerTileSize = ref<'medium' | 'large'>('large')
 
 // Edit Controls
 const topText = ref('')
@@ -788,58 +791,119 @@ function removeTag(tag: string) {
     <Teleport to="body">
       <div
         v-if="showLibraryPicker"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-6 animate-in fade-in duration-150"
         @click.self="showLibraryPicker = false"
       >
-        <div class="w-full max-w-2xl bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-          <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60">
-            <div class="flex items-center gap-2">
-              <ImageIcon class="w-5 h-5 text-purple-400" />
-              <h4 class="font-bold text-sm text-dark-100">Wybierz mema ze swojej biblioteki</h4>
+        <div class="w-full max-w-5xl bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[88vh]">
+          <!-- Header -->
+          <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/80">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                <ImageIcon class="w-5 h-5" />
+              </div>
+              <div>
+                <h4 class="font-bold text-sm text-dark-100 flex items-center gap-2">
+                  <span>Wybierz mema ze swojej biblioteki</span>
+                  <span class="text-xs text-dark-400 font-normal">({{ availableLibraryMemes.length }} dostępnych)</span>
+                </h4>
+                <p class="text-xs text-dark-400">Kliknij na dowolną grafikę, aby załadować ją do Meme Studio</p>
+              </div>
             </div>
-            <button @click="showLibraryPicker = false" class="text-dark-400 hover:text-white p-1">
+            <button @click="showLibraryPicker = false" class="text-dark-400 hover:text-white p-1.5 rounded-lg hover:bg-dark-700 transition-colors">
               <X class="w-5 h-5" />
             </button>
           </div>
 
-          <div class="p-3 border-b border-dark-700 bg-dark-900/40">
-            <div class="relative">
+          <!-- Filter & Size Bar -->
+          <div class="p-3 border-b border-dark-700 bg-dark-900/50 flex items-center justify-between gap-3">
+            <div class="relative flex-1 max-w-md">
               <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
               <input
                 v-model="librarySearch"
                 type="text"
-                placeholder="Szukaj po nazwie lub tagu..."
-                class="w-full bg-dark-950 border border-dark-700 rounded-xl pl-9 pr-3 py-1.5 text-xs text-dark-100 focus:outline-none focus:border-brand-500"
+                placeholder="Szukaj po nazwie lub tagach..."
+                class="w-full bg-dark-950 border border-dark-700 rounded-xl pl-9 pr-3 py-2 text-xs text-dark-100 placeholder-dark-500 focus:outline-none focus:border-brand-500"
               />
+            </div>
+
+            <div class="flex items-center gap-1 bg-dark-950 border border-dark-700 rounded-xl p-0.5">
+              <button
+                @click="pickerTileSize = 'medium'"
+                class="p-1.5 rounded-lg text-xs transition-all"
+                :class="pickerTileSize === 'medium' ? 'bg-dark-700 text-brand-400 shadow' : 'text-dark-400 hover:text-dark-200'"
+                title="Średnie kafelki"
+              >
+                <Grid class="w-4 h-4" />
+              </button>
+              <button
+                @click="pickerTileSize = 'large'"
+                class="p-1.5 rounded-lg text-xs transition-all"
+                :class="pickerTileSize === 'large' ? 'bg-dark-700 text-brand-400 shadow' : 'text-dark-400 hover:text-dark-200'"
+                title="Duże kafelki (wyraźne)"
+              >
+                <LayoutGrid class="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          <div class="p-4 overflow-y-auto grid grid-cols-3 sm:grid-cols-4 gap-3 flex-1">
+          <!-- Memes Grid with Large Images -->
+          <div
+            class="p-4 sm:p-6 overflow-y-auto flex-1 grid gap-4 content-start"
+            :class="pickerTileSize === 'large' ? 'grid-cols-2 sm:grid-cols-3 md:grid-cols-4' : 'grid-cols-3 sm:grid-cols-4 md:grid-cols-5'"
+          >
             <div
               v-for="meme in availableLibraryMemes"
               :key="meme.path"
               @click="selectFromLibrary(meme)"
-              class="group relative rounded-xl bg-dark-900 border border-dark-700/80 hover:border-brand-500 overflow-hidden cursor-pointer aspect-square flex items-center justify-center p-1 transition-all hover:scale-105 shadow-md"
+              class="group relative rounded-2xl bg-dark-900/90 border border-dark-700/80 hover:border-brand-500 overflow-hidden cursor-pointer flex flex-col transition-all hover:scale-[1.03] hover:shadow-2xl hover:shadow-brand-500/10"
+              :class="pickerTileSize === 'large' ? 'h-64 sm:h-72' : 'h-48 sm:h-52'"
             >
-              <img
-                :src="getMediaUrl(meme.path)"
-                :alt="meme.name"
-                class="w-full h-full object-contain pointer-events-none"
-              />
-              <div class="absolute inset-x-0 bottom-0 p-1.5 bg-gradient-to-t from-black/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                <span class="text-[10px] text-white font-bold truncate block">{{ meme.name }}</span>
+              <!-- Image Container -->
+              <div class="flex-1 w-full bg-dark-950 flex items-center justify-center overflow-hidden p-2 relative">
+                <img
+                  :src="getMediaUrl(meme.path)"
+                  :alt="meme.name"
+                  class="w-full h-full object-contain pointer-events-none transition-transform duration-200 group-hover:scale-105"
+                  loading="lazy"
+                />
+
+                <!-- Format badge -->
+                <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-black/60 backdrop-blur-sm text-[10px] uppercase font-bold text-dark-300">
+                  {{ meme.extension.replace('.', '') }}
+                </span>
+              </div>
+
+              <!-- Footer with Name & Tags -->
+              <div class="p-2.5 bg-dark-850 border-t border-dark-700/60 flex flex-col justify-between shrink-0">
+                <span class="text-xs font-bold text-dark-100 truncate group-hover:text-brand-300 transition-colors" :title="meme.name">
+                  {{ meme.name }}
+                </span>
+                <div class="flex items-center justify-between text-[10px] text-dark-400 mt-1">
+                  <span v-if="meme.tags.length > 0" class="truncate text-brand-400/90 font-medium">
+                    #{{ meme.tags.slice(0, 2).join(' #') }}
+                  </span>
+                  <span v-else class="italic text-dark-500">brak tagów</span>
+                  <span class="font-mono">{{ (meme.size / 1024).toFixed(0) }} KB</span>
+                </div>
               </div>
             </div>
 
-            <div v-if="availableLibraryMemes.length === 0" class="col-span-full py-12 text-center text-xs text-dark-500">
-              Brak pasujących grafik w bibliotece
+            <!-- Empty state -->
+            <div v-if="availableLibraryMemes.length === 0" class="col-span-full py-20 flex flex-col items-center justify-center text-center space-y-2">
+              <ImageIcon class="w-10 h-10 text-dark-600" />
+              <p class="text-sm font-semibold text-dark-300">Brak pasujących grafik w bibliotece</p>
+              <p class="text-xs text-dark-500">Spróbuj zmienić zapytanie w wyszukiwarce lub wgraj mema z dysku.</p>
             </div>
           </div>
 
-          <div class="p-3 border-t border-dark-700 bg-dark-900/60 flex justify-end">
+          <!-- Footer -->
+          <div class="p-3.5 border-t border-dark-700 bg-dark-900/80 flex items-center justify-between">
+            <span class="text-xs text-dark-400">
+              Wskazówka: kliknięcie w mema od razu otwiera go w generatorze.
+            </span>
             <button
               @click="showLibraryPicker = false"
-              class="px-4 py-1.5 bg-dark-700 hover:bg-dark-600 text-dark-200 rounded-xl text-xs font-semibold"
+              class="px-5 py-2 bg-dark-700 hover:bg-dark-600 text-dark-200 rounded-xl text-xs font-semibold transition-colors"
             >
               Anuluj
             </button>
