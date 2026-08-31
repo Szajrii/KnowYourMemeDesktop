@@ -1,8 +1,11 @@
 import { app, BrowserWindow, protocol, net } from 'electron'
 import path from 'path'
-import { pathToFileURL } from 'url'
+import { fileURLToPath, pathToFileURL } from 'url'
 import { registerIpcHandlers } from './ipc'
 import { mediaScanner } from './scanner'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // Register media protocol scheme as privileged before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -22,6 +25,8 @@ protocol.registerSchemesAsPrivileged([
 let mainWindow: BrowserWindow | null = null
 
 function createWindow() {
+  const preloadPath = path.join(__dirname, '../preload/index.js')
+
   mainWindow = new BrowserWindow({
     width: 1300,
     height: 850,
@@ -30,7 +35,7 @@ function createWindow() {
     backgroundColor: '#0d1117',
     title: 'Know Your Meme Desktop',
     webPreferences: {
-      preload: path.join(__dirname, '../preload/index.js'),
+      preload: preloadPath,
       nodeIntegration: false,
       contextIsolation: true,
       webSecurity: false // allows local media loading
@@ -44,7 +49,6 @@ function createWindow() {
 
   if (process.env.VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL)
-    // mainWindow.webContents.openDevTools()
   } else {
     mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'))
   }

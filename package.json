@@ -45,9 +45,11 @@
       "dist-electron"
     ],
     "win": {
+      "forceCodeSigning": false,
+      "signAndEditExecutable": false,
       "target": [
         {
-          "target": "nsis",
+          "target": "dir",
           "arch": [
             "x64"
           ]
@@ -59,12 +61,6 @@
           ]
         }
       ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
     }
   }
 }
