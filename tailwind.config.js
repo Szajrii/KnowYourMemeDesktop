@@ -9,21 +9,21 @@ export default {
     extend: {
       colors: {
         dark: {
-          900: '#0d1117',
-          800: '#161b22',
-          700: '#21262d',
-          600: '#30363d',
-          500: '#484f58',
-          400: '#8b949e',
-          300: '#c9d1d9',
-          200: '#e6edf3',
-          100: '#f0f6fc'
+          900: 'rgb(var(--color-dark-900) / <alpha-value>)',
+          800: 'rgb(var(--color-dark-800) / <alpha-value>)',
+          700: 'rgb(var(--color-dark-700) / <alpha-value>)',
+          600: 'rgb(var(--color-dark-600) / <alpha-value>)',
+          500: 'rgb(var(--color-dark-500) / <alpha-value>)',
+          400: 'rgb(var(--color-dark-400) / <alpha-value>)',
+          300: 'rgb(var(--color-dark-300) / <alpha-value>)',
+          200: 'rgb(var(--color-dark-200) / <alpha-value>)',
+          100: 'rgb(var(--color-dark-100) / <alpha-value>)'
         },
         brand: {
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          accent: '#ec4899'
+          500: 'rgb(var(--color-brand-500) / <alpha-value>)',
+          600: 'rgb(var(--color-brand-600) / <alpha-value>)',
+          700: 'rgb(var(--color-brand-700) / <alpha-value>)',
+          accent: 'rgb(var(--color-brand-accent) / <alpha-value>)'
         }
       }
     },

@@ -269,4 +269,26 @@ describe('Meme Pinia Store', () => {
     expect(copiedText).toContain('Much wow such crypto')
     expect(store.toastMessage).toContain('Skopiowano')
   })
+
+  it('should switch application theme and update DOM attributes', async () => {
+    const store = useMemeStore()
+    
+    let savedSettings: any = null
+    window.electronAPI = {
+      updateSettings: async (settings: any) => {
+        savedSettings = settings
+        return { success: true }
+      }
+    } as any
+
+    await store.setTheme('cyberpunk')
+    expect(store.settings.theme).toBe('cyberpunk')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('cyberpunk')
+    expect(savedSettings?.theme).toBe('cyberpunk')
+
+    await store.setTheme('light')
+    expect(store.settings.theme).toBe('light')
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light')
+    expect(document.documentElement.classList.contains('dark')).toBe(false)
+  })
 })

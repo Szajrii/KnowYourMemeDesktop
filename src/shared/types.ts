@@ -52,12 +52,14 @@ export interface FilterOptions {
   selectedFolder: string | null
 }
 
+export type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'dracula' | 'nord'
+
 export interface AppDatabaseData {
   folders: FolderConfig[]
   memes: Record<string, MemeItem> // keyed by path
   tags: Record<string, { color: string }> // tag name -> metadata
   settings: {
-    theme: 'dark' | 'light'
+    theme: AppTheme
     thumbnailSize: 'small' | 'medium' | 'large'
     autoPlayGifs: boolean
     autoPlayVideos: boolean

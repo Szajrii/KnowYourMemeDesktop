@@ -3,9 +3,91 @@
 @tailwind utilities;
 
 @layer base {
+  :root,
+  html[data-theme="dark"] {
+    --color-dark-900: 13 17 23;
+    --color-dark-800: 22 27 34;
+    --color-dark-700: 33 38 45;
+    --color-dark-600: 48 54 61;
+    --color-dark-500: 72 79 88;
+    --color-dark-400: 139 148 158;
+    --color-dark-300: 201 209 217;
+    --color-dark-200: 230 237 243;
+    --color-dark-100: 240 246 252;
+    --color-brand-500: 99 102 241;
+    --color-brand-600: 79 70 229;
+    --color-brand-700: 67 56 202;
+    --color-brand-accent: 236 72 153;
+  }
+
+  html[data-theme="light"] {
+    --color-dark-900: 241 245 249;
+    --color-dark-800: 255 255 255;
+    --color-dark-700: 226 232 240;
+    --color-dark-600: 203 213 225;
+    --color-dark-500: 148 163 184;
+    --color-dark-400: 100 116 139;
+    --color-dark-300: 71 85 105;
+    --color-dark-200: 30 41 59;
+    --color-dark-100: 15 23 42;
+    --color-brand-500: 99 102 241;
+    --color-brand-600: 79 70 229;
+    --color-brand-700: 67 56 202;
+    --color-brand-accent: 236 72 153;
+  }
+
+  html[data-theme="cyberpunk"] {
+    --color-dark-900: 8 8 18;
+    --color-dark-800: 16 16 32;
+    --color-dark-700: 28 28 54;
+    --color-dark-600: 50 45 80;
+    --color-dark-500: 120 100 180;
+    --color-dark-400: 166 124 255;
+    --color-dark-300: 210 180 255;
+    --color-dark-200: 240 220 255;
+    --color-dark-100: 0 240 255;
+    --color-brand-500: 255 0 128;
+    --color-brand-600: 220 0 110;
+    --color-brand-700: 180 0 90;
+    --color-brand-accent: 0 240 255;
+  }
+
+  html[data-theme="dracula"] {
+    --color-dark-900: 33 34 44;
+    --color-dark-800: 40 42 54;
+    --color-dark-700: 68 71 90;
+    --color-dark-600: 98 114 164;
+    --color-dark-500: 120 135 180;
+    --color-dark-400: 139 155 200;
+    --color-dark-300: 210 215 230;
+    --color-dark-200: 240 242 248;
+    --color-dark-100: 248 248 242;
+    --color-brand-500: 189 147 249;
+    --color-brand-600: 160 115 235;
+    --color-brand-700: 130 90 200;
+    --color-brand-accent: 255 121 198;
+  }
+
+  html[data-theme="nord"] {
+    --color-dark-900: 36 41 51;
+    --color-dark-800: 46 52 64;
+    --color-dark-700: 59 66 82;
+    --color-dark-600: 67 76 94;
+    --color-dark-500: 76 86 106;
+    --color-dark-400: 160 170 190;
+    --color-dark-300: 216 222 233;
+    --color-dark-200: 229 233 240;
+    --color-dark-100: 236 239 244;
+    --color-brand-500: 136 192 208;
+    --color-brand-600: 129 161 193;
+    --color-brand-700: 94 129 172;
+    --color-brand-accent: 235 203 139;
+  }
+
   body {
     @apply bg-dark-900 text-dark-100 font-sans;
     user-select: none;
+    transition: background-color 0.2s ease, color 0.2s ease;
   }
 }
 
@@ -16,16 +98,16 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #0d1117;
+  background: rgb(var(--color-dark-900));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #21262d;
+  background: rgb(var(--color-dark-700));
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #30363d;
+  background: rgb(var(--color-dark-600));
 }
 
 /* Smooth transitions */

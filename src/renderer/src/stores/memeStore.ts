@@ -199,6 +199,40 @@ export const useMemeStore = defineStore('meme', {
       this.memes = Object.values(data.memes || {})
       this.tags = data.tags || {}
       this.settings = { ...this.settings, ...(data.settings || {}) }
+      if (this.settings.theme) {
+        this.applyTheme(this.settings.theme as any)
+      }
+    },
+
+    applyTheme(theme: string) {
+      if (typeof document !== 'undefined') {
+        document.documentElement.setAttribute('data-theme', theme)
+        if (theme === 'light') {
+          document.documentElement.classList.remove('dark')
+        } else {
+          document.documentElement.classList.add('dark')
+        }
+      }
+    },
+
+    async setTheme(theme: 'dark' | 'light' | 'cyberpunk' | 'dracula' | 'nord') {
+      this.settings.theme = theme
+      this.applyTheme(theme)
+      if (window.electronAPI) {
+        try {
+          await window.electronAPI.updateSettings({ theme })
+          const names: Record<string, string> = {
+            dark: 'Ciemny',
+            light: 'Jasny',
+            cyberpunk: 'Cyberpunk',
+            dracula: 'Dracula',
+            nord: 'Nord'
+          }
+          this.showToast(`Zmieniono motyw: ${names[theme] || theme}`, 'info')
+        } catch (err: any) {
+          console.error('Failed to update theme setting:', err)
+        }
+      }
     },
 
     async chooseAndAddFolder() {

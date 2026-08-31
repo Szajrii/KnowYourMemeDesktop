@@ -14,7 +14,8 @@ import {
   Trash2,
   Settings2,
   X,
-  Search
+  Search,
+  Palette
 } from 'lucide-vue-next'
 
 const store = useMemeStore()
@@ -325,13 +326,67 @@ function setFavoritesOnly() {
       </div>
     </div>
 
-    <!-- Scanner Status Bar Footer -->
-    <div
-      v-if="store.isScanning"
-      class="p-2.5 bg-dark-900 border-t border-dark-700 flex items-center gap-2 text-xs text-brand-400"
-    >
-      <RefreshCw class="w-3.5 h-3.5 animate-spin shrink-0" />
-      <span class="truncate text-[11px]">{{ store.scannerStatusText }}</span>
+    <!-- Theme & Status Footer -->
+    <div class="p-3 border-t border-dark-700/80 bg-dark-800/80 space-y-2">
+      <!-- Theme Switcher -->
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-medium text-dark-400 flex items-center gap-1.5">
+          <Palette class="w-3.5 h-3.5 text-brand-400" />
+          <span>Motyw</span>
+        </span>
+
+        <div class="flex items-center gap-1 bg-dark-900/80 p-1 rounded-lg border border-dark-700">
+          <button
+            @click="store.setTheme('dark')"
+            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
+            :class="store.settings.theme === 'dark' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
+            title="Ciemny (Domyślny)"
+          >
+            <span>🌙</span>
+          </button>
+          <button
+            @click="store.setTheme('light')"
+            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
+            :class="store.settings.theme === 'light' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
+            title="Jasny"
+          >
+            <span>☀️</span>
+          </button>
+          <button
+            @click="store.setTheme('cyberpunk')"
+            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
+            :class="store.settings.theme === 'cyberpunk' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
+            title="Cyberpunk"
+          >
+            <span>🌆</span>
+          </button>
+          <button
+            @click="store.setTheme('dracula')"
+            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
+            :class="store.settings.theme === 'dracula' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
+            title="Dracula"
+          >
+            <span>🧛</span>
+          </button>
+          <button
+            @click="store.setTheme('nord')"
+            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
+            :class="store.settings.theme === 'nord' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
+            title="Nord"
+          >
+            <span>❄️</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Scanner Status Bar -->
+      <div
+        v-if="store.isScanning"
+        class="p-2 bg-dark-900 border border-dark-700 rounded-lg flex items-center gap-2 text-xs text-brand-400"
+      >
+        <RefreshCw class="w-3.5 h-3.5 animate-spin shrink-0" />
+        <span class="truncate text-[11px]">{{ store.scannerStatusText }}</span>
+      </div>
     </div>
   </aside>
 </template>
