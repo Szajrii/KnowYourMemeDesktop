@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { MemeItem } from '../../../shared/types'
 import { useMemeStore } from '../stores/memeStore'
+import { getMediaUrl } from '../utils/media'
 import {
   Heart,
   Copy,
@@ -20,11 +21,7 @@ const store = useMemeStore()
 const videoRef = ref<HTMLVideoElement | null>(null)
 const isHovered = ref(false)
 
-const mediaSrc = computed(() => {
-  // Convert path to custom media protocol
-  const normalized = props.meme.path.replace(/\\/g, '/')
-  return `media://${normalized}`
-})
+const mediaSrc = computed(() => getMediaUrl(props.meme.path))
 
 const formattedSize = computed(() => {
   const bytes = props.meme.size

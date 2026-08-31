@@ -66,19 +66,23 @@ app.whenReady().then(async () => {
   // Handle custom media:// protocol to serve local images/videos
   protocol.handle('media', (request) => {
     try {
-      // URL format: media://P:/folder/image.png or media:///P:/folder/image.png
-      let filePath = decodeURIComponent(request.url.replace(/^media:\/\/+/i, ''))
-      // On Windows fix drive letters like p:/ or C:/
-      if (/^[a-zA-Z]:/.test(filePath)) {
-        // already good
-      } else if (/^\/[a-zA-Z]:/.test(filePath)) {
-        filePath = filePath.substring(1)
+      const parsedUrl = new URL(request.url)
+      let filePath = parsedUrl.searchParams.get('path')
+
+      if (!filePath) {
+        // Fallback for direct path format
+        filePath = decodeURIComponent(request.url.replace(/^media:\/\/+(local\/)?/i, ''))
+      }
+
+      if (!filePath || !fs.existsSync(filePath)) {
+        console.warn(`[media-protocol] File not found: ${filePath}`)
+        return new Response('File not found', { status: 404 })
       }
 
       return net.fetch(pathToFileURL(filePath).toString())
     } catch (err) {
-      console.error('Failed to handle media protocol:', err)
-      return new Response('File not found', { status: 404 })
+      console.error('[media-protocol] Failed to handle request:', request.url, err)
+      return new Response('Error loading media', { status: 500 })
     }
   })
 

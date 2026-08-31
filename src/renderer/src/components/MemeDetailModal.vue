@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useMemeStore } from '../stores/memeStore'
+import { getMediaUrl } from '../utils/media'
 import {
   X,
   Heart,
@@ -38,7 +39,7 @@ watch(
 
 const mediaSrc = computed(() => {
   if (!meme.value) return ''
-  return `media://${meme.value.path.replace(/\\/g, '/')}`
+  return getMediaUrl(meme.value.path)
 })
 
 const currentIndex = computed(() => {
