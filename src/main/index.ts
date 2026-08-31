@@ -1,5 +1,6 @@
 import { app, BrowserWindow, protocol, net } from 'electron'
 import path from 'path'
+import fs from 'fs'
 import { fileURLToPath, pathToFileURL } from 'url'
 import { registerIpcHandlers } from './ipc'
 import { mediaScanner } from './scanner'
@@ -25,7 +26,10 @@ protocol.registerSchemesAsPrivileged([
 let mainWindow: BrowserWindow | null = null
 
 function createWindow() {
-  const preloadPath = path.join(__dirname, '../preload/index.js')
+  let preloadPath = path.join(__dirname, '../preload/index.cjs')
+  if (!fs.existsSync(preloadPath)) {
+    preloadPath = path.join(__dirname, '../preload/index.js')
+  }
 
   mainWindow = new BrowserWindow({
     width: 1300,
