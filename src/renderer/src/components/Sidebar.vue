@@ -18,12 +18,43 @@ import {
   Palette
 } from 'lucide-vue-next'
 
+import { AppTheme } from '../../../shared/types'
+
 const store = useMemeStore()
 const emit = defineEmits<{
   (e: 'openTagManager'): void
 }>()
 
 const tagSearch = ref('')
+const showThemeModal = ref(false)
+
+const themesList: {
+  id: AppTheme
+  name: string
+  icon: string
+  category: 'light' | 'dark'
+  desc: string
+  previewColors: string[]
+}[] = [
+  // Jasne
+  { id: 'light', name: 'Klasyczny Jasny', icon: '☀️', category: 'light', desc: 'Przejrzysty, chłodny jasny interfejs', previewColors: ['#f1f5f9', '#ffffff', '#4f46e5', '#0f172a'] },
+  { id: 'sakura', name: 'Sakura Pastel', icon: '🌸', category: 'light', desc: 'Delikatny pastelowy róż i mięta', previewColors: ['#fff1f5', '#ffffff', '#f472b6', '#34d399'] },
+  { id: 'coffee', name: 'Ciepłe Latte', icon: '☕', category: 'light', desc: 'Przytulny krem, karmel i espresso', previewColors: ['#faf5ee', '#ffffff', '#b45309', '#431b0f'] },
+  { id: 'matcha', name: 'Matcha Herbata', icon: '🍵', category: 'light', desc: 'Świeża zielona herbata i mięta', previewColors: ['#f2f9f4', '#ffffff', '#10b981', '#059669'] },
+  { id: 'ocean', name: 'Morski Błękit', icon: '🌊', category: 'light', desc: 'Lazurowy błękit i koral', previewColors: ['#f0f9ff', '#ffffff', '#0ea5e9', '#f43f5e'] },
+  { id: 'sunset', name: 'Złoty Zachód', icon: '🌅', category: 'light', desc: 'Ciepły bursztyn i słoneczny pomarańcz', previewColors: ['#fffbeb', '#ffffff', '#f97316', '#8b5cf6'] },
+
+  // Ciemne
+  { id: 'dark', name: 'Ciemny (Domyślny)', icon: '🌙', category: 'dark', desc: 'Głęboki grafit i fiolet indygo', previewColors: ['#0d1117', '#161b22', '#6366f1', '#f0f6fc'] },
+  { id: 'cyberpunk', name: 'Cyberpunk Neon', icon: '🌆', category: 'dark', desc: 'Neonowy róż i cyjan', previewColors: ['#080812', '#101020', '#ff007f', '#00f0ff'] },
+  { id: 'dracula', name: 'Dracula', icon: '🧛', category: 'dark', desc: 'Kultowy fiolet i róż', previewColors: ['#21222c', '#282a36', '#bd93f9', '#ff79c6'] },
+  { id: 'nord', name: 'Nord Arktyczny', icon: '❄️', category: 'dark', desc: 'Chłodny arktyczny błękit', previewColors: ['#242933', '#2e3440', '#88c0d0', '#eceff4'] },
+  { id: 'synthwave', name: 'Synthwave', icon: '🌌', category: 'dark', desc: 'Głęboka purpura i magenta', previewColors: ['#1a102f', '#261746', '#d946ef', '#facc15'] }
+]
+
+const currentThemeInfo = computed(() => {
+  return themesList.find(t => t.id === store.settings.theme) || themesList[0]
+})
 
 const filteredTags = computed(() => {
   const q = tagSearch.value.toLowerCase().trim()
@@ -328,56 +359,20 @@ function setFavoritesOnly() {
 
     <!-- Theme & Status Footer -->
     <div class="p-3 border-t border-dark-700/80 bg-dark-800/80 space-y-2">
-      <!-- Theme Switcher -->
-      <div class="flex items-center justify-between">
-        <span class="text-[11px] font-medium text-dark-400 flex items-center gap-1.5">
-          <Palette class="w-3.5 h-3.5 text-brand-400" />
-          <span>Motyw</span>
-        </span>
-
-        <div class="flex items-center gap-1 bg-dark-900/80 p-1 rounded-lg border border-dark-700">
-          <button
-            @click="store.setTheme('dark')"
-            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
-            :class="store.settings.theme === 'dark' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
-            title="Ciemny (Domyślny)"
-          >
-            <span>🌙</span>
-          </button>
-          <button
-            @click="store.setTheme('light')"
-            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
-            :class="store.settings.theme === 'light' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
-            title="Jasny"
-          >
-            <span>☀️</span>
-          </button>
-          <button
-            @click="store.setTheme('cyberpunk')"
-            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
-            :class="store.settings.theme === 'cyberpunk' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
-            title="Cyberpunk"
-          >
-            <span>🌆</span>
-          </button>
-          <button
-            @click="store.setTheme('dracula')"
-            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
-            :class="store.settings.theme === 'dracula' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
-            title="Dracula"
-          >
-            <span>🧛</span>
-          </button>
-          <button
-            @click="store.setTheme('nord')"
-            class="px-1.5 py-0.5 rounded text-xs transition-all flex items-center gap-1"
-            :class="store.settings.theme === 'nord' ? 'bg-brand-600 text-white font-bold shadow' : 'text-dark-400 hover:text-dark-200'"
-            title="Nord"
-          >
-            <span>❄️</span>
-          </button>
+      <!-- Theme Switcher Button / Indicator -->
+      <button
+        @click="showThemeModal = true"
+        class="w-full flex items-center justify-between p-2 rounded-xl bg-dark-900/70 border border-dark-700 hover:border-brand-500/50 hover:bg-dark-900 transition-all text-xs text-dark-300 hover:text-dark-100 group"
+        title="Otwórz paletę motywów"
+      >
+        <div class="flex items-center gap-2">
+          <Palette class="w-4 h-4 text-brand-400 group-hover:rotate-12 transition-transform" />
+          <span class="font-semibold">{{ currentThemeInfo.icon }} {{ currentThemeInfo.name }}</span>
         </div>
-      </div>
+        <span class="text-[10px] text-brand-400 font-medium px-2 py-0.5 bg-brand-500/10 rounded-md">
+          Motywy (11)
+        </span>
+      </button>
 
       <!-- Scanner Status Bar -->
       <div
@@ -388,5 +383,141 @@ function setFavoritesOnly() {
         <span class="truncate text-[11px]">{{ store.scannerStatusText }}</span>
       </div>
     </div>
+
+    <!-- Theme Gallery Modal -->
+    <Teleport to="body">
+      <Transition name="fade">
+        <div
+          v-if="showThemeModal"
+          class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          @click.self="showThemeModal = false"
+        >
+          <div class="bg-dark-800 border border-dark-700 rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <!-- Modal Header -->
+            <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60">
+              <div class="flex items-center gap-2.5">
+                <div class="p-2 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400">
+                  <Palette class="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 class="font-bold text-sm text-dark-100">Wybór Motywu Aplikacji</h3>
+                  <p class="text-xs text-dark-400">Wybierz jeden z 11 dopracowanych stylów graficznych</p>
+                </div>
+              </div>
+
+              <button
+                @click="showThemeModal = false"
+                class="p-1.5 rounded-lg text-dark-400 hover:text-white hover:bg-dark-700 transition-colors"
+              >
+                <X class="w-5 h-5" />
+              </button>
+            </div>
+
+            <!-- Modal Content (Scrollable) -->
+            <div class="p-5 overflow-y-auto space-y-6 flex-1">
+              <!-- Light Themes Section -->
+              <div class="space-y-3">
+                <div class="flex items-center gap-2 text-xs font-bold text-brand-400 uppercase tracking-wider">
+                  <span>☀️ Motywy Jasne & Pastelowe (6)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <button
+                    v-for="t in themesList.filter(x => x.category === 'light')"
+                    :key="t.id"
+                    @click="store.setTheme(t.id)"
+                    class="p-3.5 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between"
+                    :class="[
+                      store.settings.theme === t.id
+                        ? 'border-brand-500 bg-brand-500/10 ring-2 ring-brand-500/30'
+                        : 'border-dark-700 bg-dark-900/60 hover:border-dark-600 hover:bg-dark-900'
+                    ]"
+                  >
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <span class="text-lg">{{ t.icon }}</span>
+                        <span class="font-bold text-xs text-dark-100">{{ t.name }}</span>
+                      </div>
+                      <span
+                        v-if="store.settings.theme === t.id"
+                        class="text-[10px] bg-brand-600 text-white font-bold px-2 py-0.5 rounded-full"
+                      >
+                        Aktywny
+                      </span>
+                    </div>
+
+                    <p class="text-[11px] text-dark-400 mb-3">{{ t.desc }}</p>
+
+                    <!-- Color Swatches Preview -->
+                    <div class="flex items-center gap-1.5 pt-2 border-t border-dark-700/50">
+                      <span
+                        v-for="(c, ci) in t.previewColors"
+                        :key="ci"
+                        class="w-5 h-5 rounded-full border border-black/20 shadow-sm"
+                        :style="{ backgroundColor: c }"
+                      />
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Dark Themes Section -->
+              <div class="space-y-3">
+                <div class="flex items-center gap-2 text-xs font-bold text-brand-400 uppercase tracking-wider">
+                  <span>🌙 Motywy Ciemne & Futurystyczne (5)</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <button
+                    v-for="t in themesList.filter(x => x.category === 'dark')"
+                    :key="t.id"
+                    @click="store.setTheme(t.id)"
+                    class="p-3.5 rounded-xl border text-left transition-all relative overflow-hidden flex flex-col justify-between"
+                    :class="[
+                      store.settings.theme === t.id
+                        ? 'border-brand-500 bg-brand-500/10 ring-2 ring-brand-500/30'
+                        : 'border-dark-700 bg-dark-900/60 hover:border-dark-600 hover:bg-dark-900'
+                    ]"
+                  >
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <span class="text-lg">{{ t.icon }}</span>
+                        <span class="font-bold text-xs text-dark-100">{{ t.name }}</span>
+                      </div>
+                      <span
+                        v-if="store.settings.theme === t.id"
+                        class="text-[10px] bg-brand-600 text-white font-bold px-2 py-0.5 rounded-full"
+                      >
+                        Aktywny
+                      </span>
+                    </div>
+
+                    <p class="text-[11px] text-dark-400 mb-3">{{ t.desc }}</p>
+
+                    <!-- Color Swatches Preview -->
+                    <div class="flex items-center gap-1.5 pt-2 border-t border-dark-700/50">
+                      <span
+                        v-for="(c, ci) in t.previewColors"
+                        :key="ci"
+                        class="w-5 h-5 rounded-full border border-black/20 shadow-sm"
+                        :style="{ backgroundColor: c }"
+                      />
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-dark-700 bg-dark-900/60 flex items-center justify-end">
+              <button
+                @click="showThemeModal = false"
+                class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-all"
+              >
+                Gotowe
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </aside>
 </template>

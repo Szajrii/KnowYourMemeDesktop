@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { MemeItem, FolderConfig, FilterOptions, TagInfo, AppDatabaseData } from '../../../shared/types'
+import { MemeItem, FolderConfig, FilterOptions, TagInfo, AppDatabaseData, AppTheme } from '../../../shared/types'
 
 export const useMemeStore = defineStore('meme', {
   state: () => ({
@@ -7,7 +7,7 @@ export const useMemeStore = defineStore('meme', {
     folders: [] as FolderConfig[],
     tags: {} as Record<string, { color: string }>,
     settings: {
-      theme: 'dark' as 'dark' | 'light',
+      theme: 'dark' as AppTheme,
       thumbnailSize: 'medium' as 'small' | 'medium' | 'large',
       autoPlayGifs: true,
       autoPlayVideos: false,
@@ -215,18 +215,24 @@ export const useMemeStore = defineStore('meme', {
       }
     },
 
-    async setTheme(theme: 'dark' | 'light' | 'cyberpunk' | 'dracula' | 'nord') {
+    async setTheme(theme: AppTheme) {
       this.settings.theme = theme
       this.applyTheme(theme)
       if (window.electronAPI) {
         try {
           await window.electronAPI.updateSettings({ theme })
-          const names: Record<string, string> = {
-            dark: 'Ciemny',
-            light: 'Jasny',
-            cyberpunk: 'Cyberpunk',
+          const names: Record<AppTheme, string> = {
+            dark: 'Ciemny (Grafit)',
+            light: 'Klasyczny Jasny',
+            sakura: 'Sakura Pastel',
+            coffee: 'Ciepłe Latte',
+            matcha: 'Matcha Herbata',
+            ocean: 'Morski Błękit',
+            sunset: 'Złoty Zachód',
+            cyberpunk: 'Cyberpunk Neon',
             dracula: 'Dracula',
-            nord: 'Nord'
+            nord: 'Nord Arktyczny',
+            synthwave: 'Synthwave'
           }
           this.showToast(`Zmieniono motyw: ${names[theme] || theme}`, 'info')
         } catch (err: any) {

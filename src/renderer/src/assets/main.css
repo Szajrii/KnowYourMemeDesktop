@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @layer base {
+  /* 🌙 DARK (Default) */
   :root,
   html[data-theme="dark"] {
     --color-dark-900: 13 17 23;
@@ -20,6 +21,7 @@
     --color-brand-accent: 236 72 153;
   }
 
+  /* ☀️ LIGHT (Classic Cool) */
   html[data-theme="light"] {
     --color-dark-900: 241 245 249;
     --color-dark-800: 255 255 255;
@@ -36,6 +38,92 @@
     --color-brand-accent: 236 72 153;
   }
 
+  /* 🌸 SAKURA (Light Pastel Rose) */
+  html[data-theme="sakura"] {
+    --color-dark-900: 255 241 245; /* Soft pink-white bg */
+    --color-dark-800: 255 255 255; /* Pure white cards */
+    --color-dark-700: 254 205 218; /* Soft rose border */
+    --color-dark-600: 251 166 189;
+    --color-dark-500: 219 92 129;
+    --color-dark-400: 162 60 92;
+    --color-dark-300: 120 40 65;
+    --color-dark-200: 74 20 38;
+    --color-dark-100: 50 10 24;
+    --color-brand-500: 244 114 182; /* Sakura pink */
+    --color-brand-600: 236 72 153;
+    --color-brand-700: 219 39 119;
+    --color-brand-accent: 52 211 153; /* Mint accent */
+  }
+
+  /* ☕ COFFEE / LATTE (Warm Paper & Caramel) */
+  html[data-theme="coffee"] {
+    --color-dark-900: 250 245 238; /* Warm latte background */
+    --color-dark-800: 255 255 255;
+    --color-dark-700: 234 221 206; /* Caramel border */
+    --color-dark-600: 213 194 173;
+    --color-dark-500: 168 141 115;
+    --color-dark-400: 120 95 72;
+    --color-dark-300: 92 68 47;
+    --color-dark-200: 66 46 29;
+    --color-dark-100: 43 27 15; /* Espresso text */
+    --color-brand-500: 180 83 9; /* Warm amber coffee */
+    --color-brand-600: 146 64 14;
+    --color-brand-700: 120 53 15;
+    --color-brand-accent: 217 119 6;
+  }
+
+  /* 🍵 MATCHA (Light Fresh Mint & Tea) */
+  html[data-theme="matcha"] {
+    --color-dark-900: 242 249 244; /* Light herbal bg */
+    --color-dark-800: 255 255 255;
+    --color-dark-700: 212 237 218; /* Leaf border */
+    --color-dark-600: 172 216 183;
+    --color-dark-500: 110 174 126;
+    --color-dark-400: 60 125 78;
+    --color-dark-300: 40 90 55;
+    --color-dark-200: 25 65 37;
+    --color-dark-100: 15 42 23;
+    --color-brand-500: 16 185 129; /* Emerald matcha */
+    --color-brand-600: 5 150 105;
+    --color-brand-700: 4 120 87;
+    --color-brand-accent: 245 158 11;
+  }
+
+  /* 🌊 OCEAN (Light Coastal Blue) */
+  html[data-theme="ocean"] {
+    --color-dark-900: 240 249 255; /* Sky blue bg */
+    --color-dark-800: 255 255 255;
+    --color-dark-700: 210 236 250;
+    --color-dark-600: 170 216 244;
+    --color-dark-500: 100 170 215;
+    --color-dark-400: 45 118 168;
+    --color-dark-300: 25 85 130;
+    --color-dark-200: 15 58 95;
+    --color-dark-100: 8 36 64;
+    --color-brand-500: 14 165 233; /* Sky blue */
+    --color-brand-600: 2 132 199;
+    --color-brand-700: 3 105 161;
+    --color-brand-accent: 244 63 94; /* Coral pink accent */
+  }
+
+  /* 🌅 SUNSET (Solarized Warm Amber) */
+  html[data-theme="sunset"] {
+    --color-dark-900: 255 251 235; /* Warm yellow/amber bg */
+    --color-dark-800: 255 255 255;
+    --color-dark-700: 254 235 186;
+    --color-dark-600: 252 211 133;
+    --color-dark-500: 217 146 43;
+    --color-dark-400: 165 95 18;
+    --color-dark-300: 125 65 10;
+    --color-dark-200: 90 40 5;
+    --color-dark-100: 55 20 2;
+    --color-brand-500: 249 115 22; /* Sunset orange */
+    --color-brand-600: 234 88 12;
+    --color-brand-700: 194 65 12;
+    --color-brand-accent: 139 92 246; /* Violet accent */
+  }
+
+  /* 🌆 CYBERPUNK */
   html[data-theme="cyberpunk"] {
     --color-dark-900: 8 8 18;
     --color-dark-800: 16 16 32;
@@ -52,6 +140,7 @@
     --color-brand-accent: 0 240 255;
   }
 
+  /* 🧛 DRACULA */
   html[data-theme="dracula"] {
     --color-dark-900: 33 34 44;
     --color-dark-800: 40 42 54;
@@ -68,6 +157,7 @@
     --color-brand-accent: 255 121 198;
   }
 
+  /* ❄️ NORD */
   html[data-theme="nord"] {
     --color-dark-900: 36 41 51;
     --color-dark-800: 46 52 64;
@@ -82,6 +172,23 @@
     --color-brand-600: 129 161 193;
     --color-brand-700: 94 129 172;
     --color-brand-accent: 235 203 139;
+  }
+
+  /* 🌌 SYNTHWAVE */
+  html[data-theme="synthwave"] {
+    --color-dark-900: 26 16 47;
+    --color-dark-800: 38 23 70;
+    --color-dark-700: 58 35 105;
+    --color-dark-600: 90 55 155;
+    --color-dark-500: 140 90 210;
+    --color-dark-400: 185 140 240;
+    --color-dark-300: 220 185 255;
+    --color-dark-200: 245 225 255;
+    --color-dark-100: 255 245 255;
+    --color-brand-500: 217 70 239; /* Fuchsia */
+    --color-brand-600: 192 38 211;
+    --color-brand-700: 162 28 175;
+    --color-brand-accent: 250 204 21; /* Yellow */
   }
 
   body {

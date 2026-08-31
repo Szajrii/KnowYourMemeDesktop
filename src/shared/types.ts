@@ -52,7 +52,18 @@ export interface FilterOptions {
   selectedFolder: string | null
 }
 
-export type AppTheme = 'dark' | 'light' | 'cyberpunk' | 'dracula' | 'nord'
+export type AppTheme =
+  | 'dark'
+  | 'light'
+  | 'sakura'
+  | 'coffee'
+  | 'matcha'
+  | 'ocean'
+  | 'sunset'
+  | 'cyberpunk'
+  | 'dracula'
+  | 'nord'
+  | 'synthwave'
 
 export interface AppDatabaseData {
   folders: FolderConfig[]
