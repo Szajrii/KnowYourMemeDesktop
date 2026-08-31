@@ -342,7 +342,9 @@ export const useMemeStore = defineStore('meme', {
         const res = await window.electronAPI.copyImageToClipboard(meme.path)
         if (res.success) {
           this.showToast(
-            res.mode === 'image' ? 'Obraz skopiowany do schowka!' : 'Ścieżka pliku skopiowana!',
+            res.mode === 'image'
+              ? 'Obraz skopiowany do schowka! Wklej go (Ctrl+V) w Messengerze / Discordzie.'
+              : 'Ścieżka pliku skopiowana do schowka!',
             'success'
           )
         } else {

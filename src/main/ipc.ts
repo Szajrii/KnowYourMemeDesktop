@@ -87,25 +87,36 @@ export function registerIpcHandlers(win: BrowserWindow) {
       }
 
       const ext = path.extname(filePath).toLowerCase()
-      const fileUrl = pathToFileURL(filePath).toString()
 
-      if (['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.gif'].includes(ext)) {
-        const img = nativeImage.createFromPath(filePath)
-        if (!img.isEmpty()) {
-          clipboard.write({
-            image: img,
-            html: `<img src="${fileUrl}" alt="${path.basename(filePath)}" />`,
-            text: filePath
-          })
-          return { success: true, mode: 'image' }
+      if (['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.gif', '.ico'].includes(ext)) {
+        try {
+          const buffer = await fs.promises.readFile(filePath)
+          let img = nativeImage.createFromBuffer(buffer)
+
+          if (img.isEmpty()) {
+            img = nativeImage.createFromPath(filePath)
+          }
+
+          if (!img.isEmpty()) {
+            // Clear clipboard completely so apps (like Messenger/Discord) do not paste text path
+            clipboard.clear()
+            clipboard.writeImage(img)
+            return { success: true, mode: 'image' }
+          }
+        } catch (readErr) {
+          console.error('Failed to read image buffer, trying createFromPath:', readErr)
+          const img = nativeImage.createFromPath(filePath)
+          if (!img.isEmpty()) {
+            clipboard.clear()
+            clipboard.writeImage(img)
+            return { success: true, mode: 'image' }
+          }
         }
       }
       
-      // Fallback or for videos: write file path & file url
-      clipboard.write({
-        text: filePath,
-        html: `<a href="${fileUrl}">${path.basename(filePath)}</a>`
-      })
+      // Fallback for videos or other formats: write text path
+      clipboard.clear()
+      clipboard.writeText(filePath)
       return { success: true, mode: 'path' }
     } catch (e: any) {
       console.error('Error copying to clipboard:', e)
