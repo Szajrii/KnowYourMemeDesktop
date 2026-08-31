@@ -26,6 +26,10 @@ export const useMemeStore = defineStore('meme', {
     selectedPaths: new Set<string>(),
     isScanning: false,
     scannerStatusText: '',
+    isOcrScanning: false,
+    ocrProgressText: '',
+    isFindingDuplicates: false,
+    duplicateGroups: [] as any[],
     toastMessage: null as string | null,
     toastType: 'info' as 'info' | 'success' | 'error',
     toastTimeout: null as any
@@ -101,12 +105,13 @@ export const useMemeStore = defineStore('meme', {
           }
         }
 
-        // Text search query (name, tags, description)
+        // Text search query (name, tags, description, OCR recognized text)
         if (query) {
           const inName = meme.name.toLowerCase().includes(query)
           const inTags = meme.tags.some(t => t.toLowerCase().includes(query))
           const inDesc = meme.description ? meme.description.toLowerCase().includes(query) : false
-          if (!inName && !inTags && !inDesc) {
+          const inOcr = meme.ocrText ? meme.ocrText.toLowerCase().includes(query) : false
+          if (!inName && !inTags && !inDesc && !inOcr) {
             return false
           }
         }
@@ -195,8 +200,74 @@ export const useMemeStore = defineStore('meme', {
             }
           }
         })
+
+        if (window.electronAPI.onOcrProgress) {
+          window.electronAPI.onOcrProgress((prog) => {
+            this.ocrProgressText = `OCR (${prog.current}/${prog.total}): ${prog.file}`
+          })
+        }
       } catch (err) {
         console.error('Failed to initialize meme store:', err)
+      }
+    },
+
+    async scanMemeOcr(meme: MemeItem): Promise<string | null> {
+      if (!window.electronAPI) return null
+      try {
+        this.showToast('Rozpoznawanie tekstu (OCR)...', 'info')
+        const res = await window.electronAPI.scanOcrMeme(meme.path)
+        if (res.success && res.text) {
+          meme.ocrText = res.text
+          if (this.selectedMeme && this.selectedMeme.path === meme.path) {
+            this.selectedMeme.ocrText = res.text
+          }
+          this.showToast('Odczytano tekst z mema!', 'success')
+          return res.text
+        } else {
+          this.showToast('Nie wykryto tekstu na obrazie', 'info')
+          return null
+        }
+      } catch (e: any) {
+        this.showToast(`Błąd OCR: ${e.message}`, 'error')
+        return null
+      }
+    },
+
+    async scanAllOcr() {
+      if (!window.electronAPI || this.isOcrScanning) return
+      try {
+        this.isOcrScanning = true
+        this.showToast('Rozpoczęto skanowanie OCR w tle...', 'info')
+        const res = await window.electronAPI.scanAllOcr()
+        this.isOcrScanning = false
+        this.ocrProgressText = ''
+        if (res.success) {
+          this.showToast(`OCR zakończone! Zindeksowano ${res.count} memów.`, 'success')
+        }
+      } catch (e: any) {
+        this.isOcrScanning = false
+        this.ocrProgressText = ''
+        this.showToast(`Błąd OCR: ${e.message}`, 'error')
+      }
+    },
+
+    async findDuplicates() {
+      if (!window.electronAPI) return []
+      try {
+        this.isFindingDuplicates = true
+        const res = await window.electronAPI.findDuplicates()
+        this.isFindingDuplicates = false
+        if (res.success) {
+          this.duplicateGroups = res.duplicates || []
+          return this.duplicateGroups
+        } else {
+          this.showToast(res.message || 'Błąd wyszukiwania duplikatów', 'error')
+          return []
+        }
+      } catch (e: any) {
+        this.isFindingDuplicates = false
+        this.showToast(`Błąd: ${e.message}`, 'error')
+        return []
       }
     },
 

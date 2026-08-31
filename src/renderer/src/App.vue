@@ -8,12 +8,14 @@ import MemeDetailModal from './components/MemeDetailModal.vue'
 import TagManagerModal from './components/TagManagerModal.vue'
 import BatchTagModal from './components/BatchTagModal.vue'
 import PasteMemeModal from './components/PasteMemeModal.vue'
+import DuplicateFinderModal from './components/DuplicateFinderModal.vue'
 import Toast from './components/Toast.vue'
 
 const store = useMemeStore()
 const showTagManager = ref(false)
 const showBatchTagModal = ref(false)
 const showPasteModal = ref(false)
+const showDuplicateModal = ref(false)
 const pastedImageDataUrl = ref('')
 
 async function checkAndHandlePaste(e?: ClipboardEvent) {
@@ -84,7 +86,9 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
   // Escape -> close modals or clear selection
   if (e.key === 'Escape') {
-    if (showPasteModal.value) {
+    if (showDuplicateModal.value) {
+      showDuplicateModal.value = false
+    } else if (showPasteModal.value) {
       showPasteModal.value = false
     } else if (showTagManager.value) {
       showTagManager.value = false
@@ -113,7 +117,10 @@ onUnmounted(() => {
 <template>
   <div class="flex h-screen w-screen overflow-hidden bg-dark-900 text-dark-100 antialiased font-sans">
     <!-- Left Sidebar -->
-    <Sidebar @open-tag-manager="showTagManager = true" />
+    <Sidebar
+      @open-tag-manager="showTagManager = true"
+      @open-duplicates="showDuplicateModal = true"
+    />
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
@@ -132,6 +139,11 @@ onUnmounted(() => {
     <BatchTagModal
       v-if="showBatchTagModal"
       @close="showBatchTagModal = false"
+    />
+
+    <DuplicateFinderModal
+      v-if="showDuplicateModal"
+      @close="showDuplicateModal = false"
     />
 
     <PasteMemeModal

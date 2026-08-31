@@ -46,10 +46,22 @@ const api = {
   incrementUsedCount: (filePath: string): Promise<{ success: boolean; meme?: MemeItem }> => 
     ipcRenderer.invoke('system:incrementUsedCount', filePath),
 
+  scanOcrMeme: (filePath: string): Promise<{ success: boolean; text: string }> => 
+    ipcRenderer.invoke('ocr:scanMeme', filePath),
+  scanAllOcr: (): Promise<{ success: boolean; count: number }> => 
+    ipcRenderer.invoke('ocr:scanAll'),
+  findDuplicates: (): Promise<{ success: boolean; duplicates: any[]; message?: string }> => 
+    ipcRenderer.invoke('duplicates:find'),
+
   onMemesUpdated: (callback: (memes: MemeItem[]) => void) => {
     const handler = (_event: any, memes: MemeItem[]) => callback(memes)
     ipcRenderer.on('memes:updated', handler)
     return () => ipcRenderer.removeListener('memes:updated', handler)
+  },
+  onOcrProgress: (callback: (progress: { current: number; total: number; file: string }) => void) => {
+    const handler = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('ocr:progress', handler)
+    return () => ipcRenderer.removeListener('ocr:progress', handler)
   },
   onScannerStatus: (callback: (status: { folder: string; scanning: boolean; count?: number }) => void) => {
     const handler = (_event: any, status: any) => callback(status)

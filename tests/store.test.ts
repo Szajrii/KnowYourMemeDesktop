@@ -380,4 +380,53 @@ describe('Meme Pinia Store', () => {
     expect(store.memes[0].name).toBe('pasted_test.png')
     expect(store.memes[0].tags).toContain('pasted')
   })
+
+  it('should search memes by OCR recognized text', () => {
+    const store = useMemeStore()
+    const testData = JSON.parse(JSON.stringify(mockDbData))
+    testData.memes['C:\\Memes\\doge.png'].ocrText = 'Co tu sie odjaniepawla'
+
+    store.setDbData(testData)
+    store.filter.searchQuery = 'odjaniepawla'
+
+    expect(store.filteredMemes.length).toBe(1)
+    expect(store.filteredMemes[0].name).toBe('doge.png')
+  })
+
+  it('should scan single meme with OCR and update its text', async () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    window.electronAPI = {
+      scanOcrMeme: async () => ({ success: true, text: 'Rozpoznany smieszny tekst' })
+    } as any
+
+    const meme = mockMemes[0]
+    const text = await store.scanMemeOcr(meme)
+
+    expect(text).toBe('Rozpoznany smieszny tekst')
+    expect(meme.ocrText).toBe('Rozpoznany smieszny tekst')
+  })
+
+  it('should find duplicate memes', async () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    window.electronAPI = {
+      findDuplicates: async () => ({
+        success: true,
+        duplicates: [
+          {
+            hash: 'abcd1234hash',
+            totalSize: 1000000,
+            memes: [mockMemes[0], { ...mockMemes[0], path: 'C:\\Memes\\doge_copy.png' }]
+          }
+        ]
+      })
+    } as any
+
+    const duplicates = await store.findDuplicates()
+    expect(duplicates.length).toBe(1)
+    expect(duplicates[0].memes.length).toBe(2)
+  })
 })

@@ -20,7 +20,9 @@ import {
   Check,
   FileText,
   Star,
-  Flame
+  Flame,
+  FileSearch,
+  Sparkles
 } from 'lucide-vue-next'
 
 const store = useMemeStore()
@@ -466,6 +468,42 @@ onUnmounted(() => {
                     <span class="text-[10px] text-dark-400">({{ st.count }})</span>
                   </button>
                 </div>
+              </div>
+            </div>
+
+            <!-- OCR Recognized Text Section -->
+            <div class="p-4 border-b border-dark-700/80 space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <FileSearch class="w-3.5 h-3.5" />
+                  <span>Tekst z obrazu (OCR)</span>
+                </span>
+
+                <button
+                  v-if="meme.type === 'image'"
+                  @click="store.scanMemeOcr(meme)"
+                  class="text-[11px] text-brand-400 hover:text-brand-300 flex items-center gap-1 font-medium hover:underline transition-colors"
+                >
+                  <Sparkles class="w-3 h-3" />
+                  <span>{{ meme.ocrText ? 'Przeskanuj ponownie' : 'Odczytaj tekst (OCR)' }}</span>
+                </button>
+              </div>
+
+              <div
+                v-if="meme.ocrText"
+                class="p-2.5 bg-dark-900/90 rounded-xl border border-dark-700/80 text-xs text-dark-200 select-all relative group"
+              >
+                <p class="pr-8 leading-relaxed font-sans">{{ meme.ocrText }}</p>
+                <button
+                  @click="store.copyMemeMetadata({ ...meme, description: meme.ocrText, tags: [] })"
+                  class="absolute top-2 right-2 p-1 rounded-md bg-dark-800 text-dark-400 hover:text-white hover:bg-dark-700 opacity-0 group-hover:opacity-100 transition-opacity shadow"
+                  title="Kopiuj odczytany tekst"
+                >
+                  <Copy class="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <div v-else class="text-[11px] text-dark-500 italic">
+                {{ meme.type === 'image' ? 'Tekst nie został jeszcze odczytany. Kliknij "Odczytaj tekst", aby wyszukiwać mema po jego treści.' : 'OCR jest dostępny tylko dla plików graficznych.' }}
               </div>
             </div>
 

@@ -4,6 +4,8 @@ import path from 'path'
 import { pathToFileURL } from 'url'
 import { db } from './db'
 import { mediaScanner } from './scanner'
+import { ocrService } from './ocr'
+import { findDuplicates } from './duplicates'
 import { FolderConfig, MemeItem, AppDatabaseData } from '../shared/types'
 
 export function registerIpcHandlers(win: BrowserWindow) {
@@ -288,5 +290,30 @@ export function registerIpcHandlers(win: BrowserWindow) {
   ipcMain.handle('system:incrementUsedCount', (_event, filePath: string) => {
     const updated = db.incrementUsedCount(filePath)
     return { success: !!updated, meme: updated }
+  })
+
+  // OCR Handlers
+  ipcMain.handle('ocr:scanMeme', async (_event, filePath: string) => {
+    const text = await ocrService.scanFile(filePath)
+    return { success: !!text, text: text || '' }
+  })
+
+  ipcMain.handle('ocr:scanAll', async (_event) => {
+    const count = await ocrService.scanAllUnindexed((current, total, file) => {
+      win.webContents.send('ocr:progress', { current, total, file })
+    })
+    win.webContents.send('memes:updated', db.getMemes())
+    return { success: true, count }
+  })
+
+  // Duplicates Handler
+  ipcMain.handle('duplicates:find', async () => {
+    try {
+      const duplicates = await findDuplicates()
+      return { success: true, duplicates }
+    } catch (e: any) {
+      console.error('Failed to find duplicates:', e)
+      return { success: false, message: e.message, duplicates: [] }
+    }
   })
 }

@@ -15,7 +15,9 @@ import {
   Settings2,
   X,
   Search,
-  Palette
+  Palette,
+  Copy,
+  FileSearch
 } from 'lucide-vue-next'
 
 import { AppTheme } from '../../../shared/types'
@@ -23,6 +25,7 @@ import { AppTheme } from '../../../shared/types'
 const store = useMemeStore()
 const emit = defineEmits<{
   (e: 'openTagManager'): void
+  (e: 'openDuplicates'): void
 }>()
 
 const tagSearch = ref('')
@@ -358,7 +361,29 @@ function setFavoritesOnly() {
     </div>
 
     <!-- Theme & Status Footer -->
-    <div class="p-3 border-t border-dark-700/80 bg-dark-800/80 space-y-2">
+    <div class="p-3 border-t border-dark-700/80 bg-dark-800/80 space-y-1.5">
+      <!-- Duplicate Finder & OCR Tools Row -->
+      <div class="grid grid-cols-2 gap-1.5">
+        <button
+          @click="emit('openDuplicates')"
+          class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-amber-500/40 text-dark-300 hover:text-amber-300 text-[11px] font-semibold transition-all shadow-sm"
+          title="Wykryj identyczne pliki i zwolnij miejsce"
+        >
+          <Copy class="w-3.5 h-3.5 text-amber-400" />
+          <span>Duplikaty</span>
+        </button>
+
+        <button
+          @click="store.scanAllOcr"
+          :disabled="store.isOcrScanning"
+          class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-brand-500/40 text-dark-300 hover:text-brand-300 text-[11px] font-semibold transition-all shadow-sm disabled:opacity-50"
+          title="Rozpoznaj tekst (OCR) dla wszystkich memów bez indeksu"
+        >
+          <FileSearch class="w-3.5 h-3.5 text-brand-400" :class="store.isOcrScanning ? 'animate-pulse' : ''" />
+          <span>{{ store.isOcrScanning ? 'OCR...' : 'Skan OCR' }}</span>
+        </button>
+      </div>
+
       <!-- Theme Switcher Button / Indicator -->
       <button
         @click="showThemeModal = true"
@@ -373,6 +398,15 @@ function setFavoritesOnly() {
           Motywy (11)
         </span>
       </button>
+
+      <!-- OCR Progress Bar -->
+      <div
+        v-if="store.isOcrScanning && store.ocrProgressText"
+        class="p-2 bg-brand-950/40 border border-brand-500/30 rounded-lg flex items-center gap-2 text-xs text-brand-300 animate-pulse"
+      >
+        <FileSearch class="w-3.5 h-3.5 shrink-0 text-brand-400" />
+        <span class="truncate text-[10px] font-mono">{{ store.ocrProgressText }}</span>
+      </div>
 
       <!-- Scanner Status Bar -->
       <div

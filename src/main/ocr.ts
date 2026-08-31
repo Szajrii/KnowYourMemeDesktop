@@ -1,0 +1,65 @@
+import { createWorker } from 'tesseract.js'
+import fs from 'fs'
+import path from 'path'
+import { db } from './db'
+
+class OcrService {
+  private worker: any = null
+  private isProcessing = false
+
+  private async getWorker() {
+    if (!this.worker) {
+      this.worker = await createWorker('pol+eng', 1, {
+        logger: () => {}
+      })
+    }
+    return this.worker
+  }
+
+  public async scanFile(filePath: string): Promise<string | null> {
+    try {
+      if (!fs.existsSync(filePath)) return null
+      const ext = path.extname(filePath).toLowerCase()
+      if (!['.jpg', '.jpeg', '.png', '.bmp', '.webp'].includes(ext)) {
+        return null
+      }
+
+      const worker = await this.getWorker()
+      const ret = await worker.recognize(filePath)
+      const text = (ret.data.text || '').replace(/\s+/g, ' ').trim()
+
+      if (text) {
+        db.updateMeme(filePath, { ocrText: text })
+      }
+      return text
+    } catch (e) {
+      console.error('OCR Error on file:', filePath, e)
+      return null
+    }
+  }
+
+  public async scanAllUnindexed(onProgress?: (current: number, total: number, file: string) => void): Promise<number> {
+    if (this.isProcessing) return 0
+    this.isProcessing = true
+    let count = 0
+
+    try {
+      const memes = db.getMemes()
+      const toScan = memes.filter(m => m.type === 'image' && !m.ocrText && fs.existsSync(m.path))
+      const total = toScan.length
+
+      for (let i = 0; i < toScan.length; i++) {
+        const item = toScan[i]
+        if (onProgress) onProgress(i + 1, total, item.name)
+        const text = await this.scanFile(item.path)
+        if (text) count++
+      }
+    } finally {
+      this.isProcessing = false
+    }
+
+    return count
+  }
+}
+
+export const ocrService = new OcrService()
