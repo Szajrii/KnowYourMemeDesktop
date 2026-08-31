@@ -14,7 +14,20 @@ export default defineConfig({
           build: {
             outDir: 'dist-electron/main',
             rollupOptions: {
-              external: ['electron', 'chokidar', 'fs', 'path', 'os', 'crypto']
+              external: [
+                'electron',
+                'chokidar',
+                'tesseract.js',
+                'fs',
+                'path',
+                'os',
+                'crypto',
+                'url',
+                'stream',
+                'util',
+                'events',
+                'buffer'
+              ]
             }
           }
         }

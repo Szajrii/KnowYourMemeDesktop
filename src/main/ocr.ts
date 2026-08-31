@@ -1,4 +1,3 @@
-import { createWorker } from 'tesseract.js'
 import fs from 'fs'
 import path from 'path'
 import { db } from './db'
@@ -9,6 +8,7 @@ class OcrService {
 
   private async getWorker() {
     if (!this.worker) {
+      const { createWorker } = await import('tesseract.js')
       this.worker = await createWorker('pol+eng', 1, {
         logger: () => {}
       })
