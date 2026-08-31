@@ -85,6 +85,19 @@ export function registerIpcHandlers(win: BrowserWindow) {
     return db.getData()
   })
 
+function createHDROPBuffer(filePath: string): Buffer {
+  // Standard Win32 DROPFILES header (20 bytes)
+  const header = Buffer.alloc(20)
+  header.writeUInt32LE(20, 0)   // pFiles = 20
+  header.writeInt32LE(0, 4)     // pt.x = 0
+  header.writeInt32LE(0, 8)     // pt.y = 0
+  header.writeInt32LE(0, 12)    // fNC = 0
+  header.writeInt32LE(1, 16)    // fWide = 1 (Unicode)
+
+  const pathBuffer = Buffer.from(filePath + '\0\0', 'ucs2')
+  return Buffer.concat([header, pathBuffer])
+}
+
   // System integrations
   ipcMain.handle('system:copyImageToClipboard', async (_event, filePath: string) => {
     try {
@@ -108,6 +121,7 @@ export function registerIpcHandlers(win: BrowserWindow) {
             clipboard.writeImage(img)
             if (process.platform === 'win32') {
               try {
+                clipboard.writeBuffer('CF_HDROP', createHDROPBuffer(filePath))
                 const fileNameWBuffer = Buffer.from(filePath + '\0\0', 'ucs2')
                 clipboard.writeBuffer('FileNameW', fileNameWBuffer)
               } catch (_) {}
@@ -119,9 +133,10 @@ export function registerIpcHandlers(win: BrowserWindow) {
         }
       }
       
-      // Native Windows file clipboard format (FileNameW / CF_HDROP) for audio, video and other files
+      // Native Windows file clipboard format (CF_HDROP + FileNameW) for audio, video and other files
       clipboard.clear()
       if (process.platform === 'win32') {
+        clipboard.writeBuffer('CF_HDROP', createHDROPBuffer(filePath))
         const fileNameWBuffer = Buffer.from(filePath + '\0\0', 'ucs2')
         clipboard.writeBuffer('FileNameW', fileNameWBuffer)
       } else {
