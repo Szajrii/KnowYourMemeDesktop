@@ -125,12 +125,12 @@ onUnmounted(() => {
     <MemeDetailModal />
     
     <TagManagerModal
-      :visible="showTagManager"
+      v-if="showTagManager"
       @close="showTagManager = false"
     />
 
     <BatchTagModal
-      :visible="showBatchTagModal"
+      v-if="showBatchTagModal"
       @close="showBatchTagModal = false"
     />
 
