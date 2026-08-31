@@ -11,12 +11,14 @@ import {
   Tags,
   Shuffle,
   Dices,
-  Sparkles
+  Sparkles,
+  BarChart3
 } from 'lucide-vue-next'
 
 const store = useMemeStore()
 const emit = defineEmits<{
   (e: 'openBatchTagModal'): void
+  (e: 'openStats'): void
 }>()
 
 function toggleSelectAll() {
@@ -52,6 +54,16 @@ function toggleSelectAll() {
 
       <!-- Quick Action Controls -->
       <div class="flex items-center gap-2.5">
+        <!-- Stats Dashboard Button -->
+        <button
+          @click="emit('openStats')"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-dark-900 hover:bg-dark-700 border border-dark-700 text-dark-300 hover:text-white text-xs font-semibold transition-all active:scale-95 shadow-sm"
+          title="Zobacz statystyki i podsumowanie swojej kolekcji"
+        >
+          <BarChart3 class="w-4 h-4 text-amber-400" />
+          <span>Statystyki</span>
+        </button>
+
         <!-- Meme Generator / Studio Button -->
         <button
           @click="store.openStudio()"

@@ -9,12 +9,14 @@ import { MemeItem, MediaType } from '../shared/types'
 const IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.svg', '.avif', '.ico'])
 const GIF_EXTS = new Set(['.gif'])
 const VIDEO_EXTS = new Set(['.mp4', '.webm', '.mkv', '.mov', '.avi', '.m4v', '.ogv'])
+const AUDIO_EXTS = new Set(['.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac'])
 
 function getMediaType(ext: string): MediaType | null {
   const normalized = ext.toLowerCase()
   if (GIF_EXTS.has(normalized)) return 'gif'
   if (IMAGE_EXTS.has(normalized)) return 'image'
   if (VIDEO_EXTS.has(normalized)) return 'video'
+  if (AUDIO_EXTS.has(normalized)) return 'audio'
   return null
 }
 

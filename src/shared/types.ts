@@ -1,4 +1,4 @@
-export type MediaType = 'image' | 'video' | 'gif'
+export type MediaType = 'image' | 'video' | 'gif' | 'audio'
 
 export interface MemeItem {
   id: string
@@ -35,6 +35,15 @@ export interface FolderConfig {
   itemCount?: number
 }
 
+export interface SmartCollection {
+  id: string
+  name: string
+  icon?: string
+  tags: string[]
+  minRating?: number
+  onlyFavorites?: boolean
+}
+
 export type SortOption =
   | 'date_desc'
   | 'date_asc'
@@ -50,10 +59,11 @@ export interface FilterOptions {
   searchQuery: string
   selectedTags: string[]
   tagMatchMode: 'all' | 'any'
-  mediaType: 'all' | 'image' | 'video' | 'gif'
+  mediaType: 'all' | 'image' | 'video' | 'gif' | 'audio'
   onlyFavorites: boolean
   sortBy: SortOption
   selectedFolder: string | null
+  selectedCollectionId?: string | null
 }
 
 export type AppTheme =
@@ -73,11 +83,14 @@ export interface AppDatabaseData {
   folders: FolderConfig[]
   memes: Record<string, MemeItem> // keyed by path
   tags: Record<string, { color: string }> // tag name -> metadata
+  collections?: SmartCollection[]
   settings: {
     theme: AppTheme
     thumbnailSize: 'small' | 'medium' | 'large'
     autoPlayGifs: boolean
     autoPlayVideos: boolean
     defaultVolume: number
+    minimizeToTray?: boolean
+    autoStart?: boolean
   }
 }

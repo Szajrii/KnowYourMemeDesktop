@@ -18,7 +18,8 @@ import {
   Palette,
   Copy,
   FileSearch,
-  Database
+  Database,
+  Music
 } from 'lucide-vue-next'
 
 import { AppTheme } from '../../../shared/types'
@@ -75,7 +76,7 @@ function setFolderFilter(folderPath: string | null) {
   }
 }
 
-function toggleMediaType(type: 'image' | 'gif' | 'video') {
+function toggleMediaType(type: 'image' | 'gif' | 'video' | 'audio') {
   if (store.filter.mediaType === type && !store.filter.onlyFavorites) {
     // Toggle back to all
     store.filter.mediaType = 'all'
@@ -164,10 +165,10 @@ function setFavoritesOnly() {
         </span>
       </button>
 
-      <div class="pt-2 grid grid-cols-3 gap-1">
+      <div class="pt-2 grid grid-cols-4 gap-1">
         <button
           @click="toggleMediaType('image')"
-          class="flex flex-col items-center justify-center p-2 rounded-lg text-[11px] font-medium border transition-all"
+          class="flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-medium border transition-all"
           :class="[
             store.filter.mediaType === 'image' && !store.filter.onlyFavorites
               ? 'bg-dark-700 border-brand-500 text-brand-400'
@@ -175,14 +176,14 @@ function setFavoritesOnly() {
           ]"
           title="Filtruj: Tylko obrazy (kliknij ponownie, aby wyczyścić)"
         >
-          <Image class="w-4 h-4 mb-1" />
+          <Image class="w-3.5 h-3.5 mb-1" />
           <span>Obrazy</span>
-          <span class="text-[10px] text-dark-400">({{ store.stats.images }})</span>
+          <span class="text-[9px] text-dark-400">({{ store.stats.images }})</span>
         </button>
 
         <button
           @click="toggleMediaType('gif')"
-          class="flex flex-col items-center justify-center p-2 rounded-lg text-[11px] font-medium border transition-all"
+          class="flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-medium border transition-all"
           :class="[
             store.filter.mediaType === 'gif' && !store.filter.onlyFavorites
               ? 'bg-dark-700 border-brand-accent text-brand-accent'
@@ -190,14 +191,14 @@ function setFavoritesOnly() {
           ]"
           title="Filtruj: Tylko GIFy (kliknij ponownie, aby wyczyścić)"
         >
-          <Sparkles class="w-4 h-4 mb-1" />
+          <Sparkles class="w-3.5 h-3.5 mb-1" />
           <span>GIFy</span>
-          <span class="text-[10px] text-dark-400">({{ store.stats.gifs }})</span>
+          <span class="text-[9px] text-dark-400">({{ store.stats.gifs }})</span>
         </button>
 
         <button
           @click="toggleMediaType('video')"
-          class="flex flex-col items-center justify-center p-2 rounded-lg text-[11px] font-medium border transition-all"
+          class="flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-medium border transition-all"
           :class="[
             store.filter.mediaType === 'video' && !store.filter.onlyFavorites
               ? 'bg-dark-700 border-brand-500 text-brand-400'
@@ -205,9 +206,24 @@ function setFavoritesOnly() {
           ]"
           title="Filtruj: Tylko wideo (kliknij ponownie, aby wyczyścić)"
         >
-          <Film class="w-4 h-4 mb-1" />
+          <Film class="w-3.5 h-3.5 mb-1" />
           <span>Wideo</span>
-          <span class="text-[10px] text-dark-400">({{ store.stats.videos }})</span>
+          <span class="text-[9px] text-dark-400">({{ store.stats.videos }})</span>
+        </button>
+
+        <button
+          @click="toggleMediaType('audio')"
+          class="flex flex-col items-center justify-center p-1.5 rounded-lg text-[10px] font-medium border transition-all"
+          :class="[
+            store.filter.mediaType === 'audio' && !store.filter.onlyFavorites
+              ? 'bg-dark-700 border-amber-500 text-amber-400'
+              : 'border-transparent text-dark-400 hover:bg-dark-700/60 hover:text-dark-200'
+          ]"
+          title="Filtruj: Tylko dźwięki (kliknij ponownie, aby wyczyścić)"
+        >
+          <Music class="w-3.5 h-3.5 mb-1" />
+          <span>Dźwięki</span>
+          <span class="text-[9px] text-dark-400">({{ store.stats.audio }})</span>
         </button>
       </div>
     </div>

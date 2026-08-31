@@ -444,4 +444,31 @@ describe('Meme Pinia Store', () => {
     expect(store.showStudioModal).toBe(false)
     expect(store.studioMeme).toBeNull()
   })
+
+  it('should calculate stats including audio memes and filter by audio', () => {
+    const store = useMemeStore()
+    const memesWithAudio = [
+      ...mockMemes,
+      {
+        id: 'audio1',
+        path: 'C:\\Memes\\bruh.mp3',
+        name: 'bruh.mp3',
+        extension: '.mp3',
+        type: 'audio' as const,
+        size: 50000,
+        createdAt: 1000,
+        modifiedAt: 1000,
+        tags: ['audio', 'bruh'],
+        isFavorite: false,
+        folder: 'C:\\Memes'
+      }
+    ]
+    store.memes = memesWithAudio
+    expect(store.stats.audio).toBe(1)
+    expect(store.stats.total).toBe(4)
+
+    store.filter.mediaType = 'audio'
+    expect(store.filteredMemes.length).toBe(1)
+    expect(store.filteredMemes[0].name).toBe('bruh.mp3')
+  })
 })

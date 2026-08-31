@@ -161,7 +161,8 @@ export const useMemeStore = defineStore('meme', {
       const images = state.memes.filter(m => m.type === 'image').length
       const gifs = state.memes.filter(m => m.type === 'gif').length
       const videos = state.memes.filter(m => m.type === 'video').length
-      return { total, favorites, images, gifs, videos }
+      const audio = state.memes.filter(m => m.type === 'audio').length
+      return { total, favorites, images, gifs, videos, audio }
     }
   },
 

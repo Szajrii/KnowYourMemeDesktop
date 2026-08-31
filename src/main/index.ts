@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol, net, globalShortcut } from 'electron'
+import { app, BrowserWindow, protocol, net, globalShortcut, Tray, Menu, nativeImage } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath, pathToFileURL } from 'url'
@@ -24,6 +24,75 @@ protocol.registerSchemesAsPrivileged([
 ])
 
 let mainWindow: BrowserWindow | null = null
+let tray: Tray | null = null
+let isQuitting = false
+
+function createTray() {
+  if (tray) return
+  const iconPath = path.join(__dirname, '../../resources/icon.png')
+  const icon = fs.existsSync(iconPath)
+    ? nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 })
+    : nativeImage.createEmpty()
+
+  tray = new Tray(icon)
+  tray.setToolTip('Know Your Meme Desktop')
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Otwórz bibliotekę',
+      click: () => {
+        if (mainWindow) {
+          if (mainWindow.isMinimized()) mainWindow.restore()
+          mainWindow.show()
+          mainWindow.focus()
+        }
+      }
+    },
+    {
+      label: 'Szybki Launcher (Alt+Space)',
+      click: () => {
+        if (mainWindow) {
+          if (mainWindow.isMinimized()) mainWindow.restore()
+          mainWindow.show()
+          mainWindow.focus()
+          mainWindow.webContents.send('launcher:toggle')
+        }
+      }
+    },
+    {
+      label: 'Losuj mema (Ctrl+R)',
+      click: () => {
+        if (mainWindow) {
+          if (mainWindow.isMinimized()) mainWindow.restore()
+          mainWindow.show()
+          mainWindow.focus()
+          mainWindow.webContents.send('launcher:random')
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Zamknij aplikację',
+      click: () => {
+        isQuitting = true
+        app.quit()
+      }
+    }
+  ])
+
+  tray.setContextMenu(contextMenu)
+  tray.on('click', () => {
+    if (mainWindow) {
+      if (mainWindow.isVisible()) {
+        mainWindow.focus()
+      } else {
+        if (mainWindow.isMinimized()) mainWindow.restore()
+        mainWindow.show()
+        mainWindow.focus()
+      }
+    }
+  })
+}
 
 function createWindow() {
   let preloadPath = path.join(__dirname, '../preload/index.cjs')
@@ -57,6 +126,13 @@ function createWindow() {
     mainWindow.loadFile(path.join(__dirname, '../../dist/index.html'))
   }
 
+  mainWindow.on('close', (e) => {
+    if (!isQuitting) {
+      e.preventDefault()
+      mainWindow?.hide()
+    }
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
@@ -87,6 +163,7 @@ app.whenReady().then(async () => {
   })
 
   createWindow()
+  createTray()
 
   // Register Global Shortcuts (Ctrl+Shift+M and Alt+Space for Quick Launcher)
   try {

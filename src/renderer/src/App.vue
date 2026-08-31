@@ -12,6 +12,7 @@ import DuplicateFinderModal from './components/DuplicateFinderModal.vue'
 import MemeStudioModal from './components/MemeStudioModal.vue'
 import QuickLauncherModal from './components/QuickLauncherModal.vue'
 import BackupModal from './components/BackupModal.vue'
+import StatsDashboardModal from './components/StatsDashboardModal.vue'
 import Toast from './components/Toast.vue'
 
 const store = useMemeStore()
@@ -21,6 +22,7 @@ const showPasteModal = ref(false)
 const showDuplicateModal = ref(false)
 const showBackupModal = ref(false)
 const showLauncherModal = ref(false)
+const showStatsModal = ref(false)
 const pastedImageDataUrl = ref('')
 
 async function checkAndHandlePaste(e?: ClipboardEvent) {
@@ -99,6 +101,8 @@ function handleGlobalKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     if (showLauncherModal.value) {
       showLauncherModal.value = false
+    } else if (showStatsModal.value) {
+      showStatsModal.value = false
     } else if (showBackupModal.value) {
       showBackupModal.value = false
     } else if (store.showStudioModal) {
@@ -148,7 +152,10 @@ onUnmounted(() => {
 
     <!-- Main Content Area -->
     <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
-      <Topbar @open-batch-tag-modal="showBatchTagModal = true" />
+      <Topbar
+        @open-batch-tag-modal="showBatchTagModal = true"
+        @open-stats="showStatsModal = true"
+      />
       <MemeGrid />
     </main>
 
@@ -173,6 +180,11 @@ onUnmounted(() => {
     <BackupModal
       v-if="showBackupModal"
       @close="showBackupModal = false"
+    />
+
+    <StatsDashboardModal
+      :visible="showStatsModal"
+      @close="showStatsModal = false"
     />
 
     <QuickLauncherModal

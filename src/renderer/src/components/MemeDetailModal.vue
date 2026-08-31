@@ -22,7 +22,8 @@ import {
   Star,
   Flame,
   FileSearch,
-  Sparkles
+  Sparkles,
+  Music
 } from 'lucide-vue-next'
 
 const store = useMemeStore()
@@ -222,6 +223,21 @@ onUnmounted(() => {
             playsinline
             class="max-w-full max-h-full rounded-xl shadow-2xl"
           />
+
+          <!-- Audio Player -->
+          <div
+            v-else-if="meme.type === 'audio'"
+            class="flex flex-col items-center justify-center p-8 bg-dark-900/90 border border-dark-700/80 rounded-2xl shadow-2xl space-y-6 max-w-lg w-full"
+          >
+            <div class="w-24 h-24 rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-xl">
+              <Music class="w-12 h-12 text-amber-400" />
+            </div>
+            <div class="text-center space-y-1">
+              <h4 class="font-bold text-sm text-dark-100">{{ meme.name }}</h4>
+              <p class="text-xs text-dark-400 font-mono">Dźwięk memowy (Audio)</p>
+            </div>
+            <audio :src="mediaSrc" controls autoplay class="w-full rounded-lg" />
+          </div>
 
           <!-- Position Counter Pill (Top-Left) -->
           <div class="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1 rounded-full bg-dark-900/80 border border-dark-700/80 backdrop-blur-md text-xs font-mono text-dark-300 shadow-lg">
