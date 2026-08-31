@@ -24,16 +24,17 @@ class OcrService {
         return null
       }
 
+      const buffer = await fs.promises.readFile(filePath)
       const worker = await this.getWorker()
-      const ret = await worker.recognize(filePath)
-      const text = (ret.data.text || '').replace(/\s+/g, ' ').trim()
+      const ret = await worker.recognize(buffer)
+      const text = (ret?.data?.text || '').replace(/\s+/g, ' ').trim()
 
       if (text) {
         db.updateMeme(filePath, { ocrText: text })
       }
       return text
     } catch (e) {
-      console.error('OCR Error on file:', filePath, e)
+      console.warn('OCR skipped file due to read error:', filePath, e)
       return null
     }
   }
@@ -50,9 +51,13 @@ class OcrService {
 
       for (let i = 0; i < toScan.length; i++) {
         const item = toScan[i]
-        if (onProgress) onProgress(i + 1, total, item.name)
-        const text = await this.scanFile(item.path)
-        if (text) count++
+        try {
+          if (onProgress) onProgress(i + 1, total, item.name)
+          const text = await this.scanFile(item.path)
+          if (text) count++
+        } catch (itemErr) {
+          console.warn('Skipping unreadable meme for OCR:', item.path, itemErr)
+        }
       }
     } finally {
       this.isProcessing = false
