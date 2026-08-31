@@ -76,7 +76,9 @@ class Database {
   }
 
   public getMemeByPath(filePath: string): MemeItem | undefined {
-    return this.data.memes[filePath]
+    if (this.data.memes[filePath]) return this.data.memes[filePath]
+    const lower = filePath.toLowerCase()
+    return Object.values(this.data.memes).find(m => m.path.toLowerCase() === lower)
   }
 
   public setMeme(meme: MemeItem) {
@@ -85,14 +87,25 @@ class Database {
   }
 
   public updateMeme(filePath: string, updates: Partial<MemeItem>): MemeItem | null {
-    const existing = this.data.memes[filePath]
+    let key = filePath
+    let existing = this.data.memes[key]
+
+    if (!existing) {
+      const lower = filePath.toLowerCase()
+      const foundKey = Object.keys(this.data.memes).find(k => k.toLowerCase() === lower)
+      if (foundKey) {
+        key = foundKey
+        existing = this.data.memes[key]
+      }
+    }
+
     if (!existing) return null
 
     const updated: MemeItem = {
       ...existing,
       ...updates
     }
-    this.data.memes[filePath] = updated
+    this.data.memes[key] = updated
 
     // Update tags dictionary if new tags are added
     if (updates.tags) {
@@ -109,10 +122,19 @@ class Database {
   }
 
   public renameMemePath(oldPath: string, newPath: string, newName: string, newExt: string): MemeItem | null {
-    const existing = this.data.memes[oldPath]
+    let key = oldPath
+    let existing = this.data.memes[key]
+    if (!existing) {
+      const lower = oldPath.toLowerCase()
+      const foundKey = Object.keys(this.data.memes).find(k => k.toLowerCase() === lower)
+      if (foundKey) {
+        key = foundKey
+        existing = this.data.memes[key]
+      }
+    }
     if (!existing) return null
 
-    delete this.data.memes[oldPath]
+    delete this.data.memes[key]
     const updated: MemeItem = {
       ...existing,
       path: newPath,
@@ -126,7 +148,16 @@ class Database {
   }
 
   public incrementUsedCount(filePath: string): MemeItem | null {
-    const existing = this.data.memes[filePath]
+    let key = filePath
+    let existing = this.data.memes[key]
+    if (!existing) {
+      const lower = filePath.toLowerCase()
+      const foundKey = Object.keys(this.data.memes).find(k => k.toLowerCase() === lower)
+      if (foundKey) {
+        key = foundKey
+        existing = this.data.memes[key]
+      }
+    }
     if (!existing) return null
     existing.usedCount = (existing.usedCount || 0) + 1
     this.save()
@@ -148,13 +179,13 @@ class Database {
   }
 
   public batchUpdateTags(paths: string[], addTags: string[], removeTags: string[]) {
-    const normAdd = addTags.map(t => t.toLowerCase().trim()).filter(Boolean)
-    const normRemove = removeTags.map(t => t.toLowerCase().trim()).filter(Boolean)
+    const normAdd = addTags.map(t => t.toLowerCase().trim().replace(/^#/, '')).filter(Boolean)
+    const normRemove = removeTags.map(t => t.toLowerCase().trim().replace(/^#/, '')).filter(Boolean)
+    const lowerPathSet = new Set(paths.map(p => p.toLowerCase()))
 
-    for (const p of paths) {
-      const meme = this.data.memes[p]
-      if (meme) {
-        let currentTags = new Set(meme.tags.map(t => t.toLowerCase().trim()))
+    for (const [key, meme] of Object.entries(this.data.memes)) {
+      if (lowerPathSet.has(key.toLowerCase()) || lowerPathSet.has(meme.path.toLowerCase())) {
+        let currentTags = new Set(meme.tags.map(t => t.toLowerCase().trim().replace(/^#/, '')))
         normAdd.forEach(t => currentTags.add(t))
         normRemove.forEach(t => currentTags.delete(t))
         meme.tags = Array.from(currentTags)

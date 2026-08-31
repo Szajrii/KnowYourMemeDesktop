@@ -15,10 +15,12 @@ const tagsToRemoveList = ref<string[]>([])
 const selectedCount = computed(() => store.selectedPaths.size)
 
 function addTagToQueue() {
-  const norm = tagToAdd.value.toLowerCase().trim().replace(/^#/, '')
-  if (!norm) return
-  if (!tagsToAddList.value.includes(norm)) {
-    tagsToAddList.value.push(norm)
+  const raw = tagToAdd.value.split(/[,;]+/)
+  for (const item of raw) {
+    const norm = item.toLowerCase().trim().replace(/^#/, '')
+    if (norm && !tagsToAddList.value.includes(norm)) {
+      tagsToAddList.value.push(norm)
+    }
   }
   tagToAdd.value = ''
 }
@@ -36,6 +38,9 @@ function toggleRemoveTag(tag: string) {
 }
 
 async function applyChanges() {
+  if (tagToAdd.value.trim()) {
+    addTagToQueue()
+  }
   if (tagsToAddList.value.length > 0) {
     await store.batchAddTags(tagsToAddList.value)
   }
@@ -129,7 +134,7 @@ async function applyChanges() {
         </button>
         <button
           @click="applyChanges"
-          :disabled="tagsToAddList.length === 0 && tagsToRemoveList.length === 0"
+          :disabled="tagsToAddList.length === 0 && tagsToRemoveList.length === 0 && !tagToAdd.trim()"
           class="px-5 py-2 bg-brand-600 hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-xs font-bold shadow-lg shadow-brand-600/30 flex items-center gap-1.5 transition-all"
         >
           <Check class="w-4 h-4" />
