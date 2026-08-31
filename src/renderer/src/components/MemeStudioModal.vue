@@ -788,7 +788,7 @@ function removeTag(tag: string) {
     <Teleport to="body">
       <div
         v-if="showLibraryPicker"
-        class="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-150"
         @click.self="showLibraryPicker = false"
       >
         <div class="w-full max-w-2xl bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
@@ -852,7 +852,7 @@ function removeTag(tag: string) {
     <Teleport to="body">
       <div
         v-if="showSaveOptions"
-        class="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150"
         @click.self="showSaveOptions = false"
       >
         <div class="w-full max-w-md bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl p-5 space-y-4">
