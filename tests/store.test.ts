@@ -260,7 +260,8 @@ describe('Meme Pinia Store', () => {
       copyMetadataToClipboard: async (text: string) => {
         copiedText = text
         return { success: true }
-      }
+      },
+      incrementUsedCount: async () => ({ success: true })
     } as any
 
     await store.copyMemeMetadata(mockMemes[0])
@@ -290,5 +291,93 @@ describe('Meme Pinia Store', () => {
     expect(store.settings.theme).toBe('light')
     expect(document.documentElement.getAttribute('data-theme')).toBe('light')
     expect(document.documentElement.classList.contains('dark')).toBe(false)
+  })
+
+  it('should set meme rating and increment used count', async () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    window.electronAPI = {
+      updateMeme: async () => ({ success: true }),
+      incrementUsedCount: async () => ({ success: true })
+    } as any
+
+    const meme = { ...mockMemes[0], usedCount: 0, rating: 0 }
+    await store.setMemeRating(meme, 5)
+    expect(meme.rating).toBe(5)
+
+    await store.incrementUsed(meme)
+    expect(meme.usedCount).toBe(1)
+  })
+
+  it('should sort by used_desc and rating_desc', () => {
+    const store = useMemeStore()
+    const testData: AppDatabaseData = {
+      folders: [...mockDbData.folders],
+      tags: { ...mockDbData.tags },
+      settings: { ...mockDbData.settings },
+      memes: {
+        'C:\\Memes\\doge.png': { ...mockMemes[0], usedCount: 10, rating: 3 },
+        'C:\\Memes\\cat_vibing.gif': { ...mockMemes[1], usedCount: 5, rating: 2 },
+        'C:\\Videos\\rickroll.mp4': { ...mockMemes[2], usedCount: 50, rating: 5 }
+      }
+    }
+
+    store.setDbData(testData)
+
+    store.filter.sortBy = 'used_desc'
+    expect(store.filteredMemes[0].name).toBe('rickroll.mp4')
+    expect(store.filteredMemes[1].name).toBe('doge.png')
+
+    store.filter.sortBy = 'rating_desc'
+    expect(store.filteredMemes[0].name).toBe('rickroll.mp4')
+    expect(store.filteredMemes[1].name).toBe('doge.png')
+  })
+
+  it('should pick a random meme', () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    store.pickRandomMeme()
+    expect(store.selectedMeme).not.toBeNull()
+    expect(store.toastMessage).toContain('Wylosowano mema')
+  })
+
+  it('should save pasted meme from clipboard', async () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    window.electronAPI = {
+      savePastedImage: async (payload: any) => ({
+        success: true,
+        meme: {
+          id: 'new_pasted',
+          path: `${payload.folderPath}\\${payload.fileName}`,
+          name: payload.fileName,
+          extension: '.png',
+          type: 'image',
+          size: 1234,
+          createdAt: Date.now(),
+          modifiedAt: Date.now(),
+          tags: payload.tags,
+          isFavorite: false,
+          description: payload.description,
+          folder: payload.folderPath,
+          usedCount: 0
+        }
+      })
+    } as any
+
+    const success = await store.savePastedMeme({
+      folderPath: 'C:\\Memes',
+      fileName: 'pasted_test.png',
+      base64Data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+      tags: ['pasted', 'fresh'],
+      description: 'Pasted meme description'
+    })
+
+    expect(success).toBe(true)
+    expect(store.memes[0].name).toBe('pasted_test.png')
+    expect(store.memes[0].tags).toContain('pasted')
   })
 })

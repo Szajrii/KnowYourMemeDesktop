@@ -37,6 +37,14 @@ const api = {
     ipcRenderer.invoke('system:deleteFile', filePath),
   renameFile: (oldPath: string, newFileName: string): Promise<{ success: boolean; updatedMeme?: MemeItem; message?: string }> => 
     ipcRenderer.invoke('system:renameFile', oldPath, newFileName),
+  readClipboardImage: (): Promise<{ hasImage: boolean; dataUrl?: string; message?: string }> => 
+    ipcRenderer.invoke('system:readClipboardImage'),
+  savePastedImage: (payload: { folderPath: string; fileName: string; base64Data: string; tags: string[]; description?: string }): Promise<{ success: boolean; meme?: MemeItem; message?: string }> => 
+    ipcRenderer.invoke('system:savePastedImage', payload),
+  startDrag: (filePath: string): Promise<void> => 
+    ipcRenderer.invoke('system:startDrag', filePath),
+  incrementUsedCount: (filePath: string): Promise<{ success: boolean; meme?: MemeItem }> => 
+    ipcRenderer.invoke('system:incrementUsedCount', filePath),
 
   onMemesUpdated: (callback: (memes: MemeItem[]) => void) => {
     const handler = (_event: any, memes: MemeItem[]) => callback(memes)

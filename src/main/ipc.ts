@@ -205,4 +205,88 @@ export function registerIpcHandlers(win: BrowserWindow) {
       return { success: false, message: e.message || 'Błąd podczas zmiany nazwy pliku' }
     }
   })
+
+  ipcMain.handle('system:readClipboardImage', async () => {
+    try {
+      const img = clipboard.readImage()
+      if (!img.isEmpty()) {
+        return { hasImage: true, dataUrl: img.toDataURL() }
+      }
+      return { hasImage: false }
+    } catch (e: any) {
+      return { hasImage: false, message: e.message }
+    }
+  })
+
+  ipcMain.handle('system:savePastedImage', async (_event, payload: {
+    folderPath: string
+    fileName: string
+    base64Data: string
+    tags: string[]
+    description?: string
+  }) => {
+    try {
+      const { folderPath, fileName, base64Data, tags, description } = payload
+      if (!fs.existsSync(folderPath)) {
+        return { success: false, message: 'Folder docelowy nie istnieje' }
+      }
+
+      let cleanName = (fileName || '').trim() || `meme_${Date.now()}`
+      if (!path.extname(cleanName)) {
+        cleanName += '.png'
+      }
+
+      cleanName = cleanName.replace(/[<>:"/\\|?*]/g, '_')
+      const filePath = path.join(folderPath, cleanName)
+
+      const base64Clean = base64Data.replace(/^data:image\/\w+;base64,/, '')
+      const buffer = Buffer.from(base64Clean, 'base64')
+
+      await fs.promises.writeFile(filePath, buffer)
+      const stats = await fs.promises.stat(filePath)
+      const ext = path.extname(filePath).toLowerCase()
+
+      const newMeme: MemeItem = {
+        id: Buffer.from(filePath).toString('base64').replace(/[/+=]/g, '_'),
+        path: filePath,
+        name: cleanName,
+        extension: ext,
+        type: 'image',
+        size: stats.size,
+        createdAt: stats.birthtimeMs || Date.now(),
+        modifiedAt: stats.mtimeMs || Date.now(),
+        tags: tags || [],
+        isFavorite: false,
+        description: description || '',
+        folder: folderPath,
+        usedCount: 0
+      }
+
+      db.addDirectMeme(newMeme)
+      return { success: true, meme: newMeme }
+    } catch (e: any) {
+      console.error('Failed to save pasted image:', e)
+      return { success: false, message: e.message || 'Błąd zapisu pliku' }
+    }
+  })
+
+  ipcMain.handle('system:startDrag', (event, filePath: string) => {
+    try {
+      if (fs.existsSync(filePath)) {
+        const img = nativeImage.createFromPath(filePath)
+        const icon = !img.isEmpty() ? img.resize({ width: 64, height: 64 }) : nativeImage.createEmpty()
+        event.sender.startDrag({
+          file: filePath,
+          icon
+        })
+      }
+    } catch (e) {
+      console.error('Failed to start drag:', e)
+    }
+  })
+
+  ipcMain.handle('system:incrementUsedCount', (_event, filePath: string) => {
+    const updated = db.incrementUsedCount(filePath)
+    return { success: !!updated, meme: updated }
+  })
 }

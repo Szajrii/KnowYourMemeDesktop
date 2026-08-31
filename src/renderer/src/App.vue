@@ -7,11 +7,51 @@ import MemeGrid from './components/MemeGrid.vue'
 import MemeDetailModal from './components/MemeDetailModal.vue'
 import TagManagerModal from './components/TagManagerModal.vue'
 import BatchTagModal from './components/BatchTagModal.vue'
+import PasteMemeModal from './components/PasteMemeModal.vue'
 import Toast from './components/Toast.vue'
 
 const store = useMemeStore()
 const showTagManager = ref(false)
 const showBatchTagModal = ref(false)
+const showPasteModal = ref(false)
+const pastedImageDataUrl = ref('')
+
+async function checkAndHandlePaste(e?: ClipboardEvent) {
+  const active = document.activeElement
+  if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
+    return // allow default text paste inside text fields
+  }
+
+  // 1. Check DOM ClipboardEvent items
+  if (e?.clipboardData) {
+    const items = e.clipboardData.items
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile()
+        if (file) {
+          e.preventDefault()
+          const reader = new FileReader()
+          reader.onload = (event) => {
+            pastedImageDataUrl.value = event.target?.result as string
+            showPasteModal.value = true
+          }
+          reader.readAsDataURL(file)
+          return
+        }
+      }
+    }
+  }
+
+  // 2. Check Electron native clipboard
+  if (window.electronAPI?.readClipboardImage) {
+    const res = await window.electronAPI.readClipboardImage()
+    if (res.hasImage && res.dataUrl) {
+      if (e) e.preventDefault()
+      pastedImageDataUrl.value = res.dataUrl
+      showPasteModal.value = true
+    }
+  }
+}
 
 function handleGlobalKeydown(e: KeyboardEvent) {
   // Ctrl+F or Cmd+F -> focus search input
@@ -21,6 +61,15 @@ function handleGlobalKeydown(e: KeyboardEvent) {
     if (searchInput) {
       searchInput.focus()
       searchInput.select()
+    }
+  }
+
+  // Ctrl+R -> random meme
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'r') {
+    const active = document.activeElement
+    if (!active || (active.tagName !== 'INPUT' && active.tagName !== 'TEXTAREA')) {
+      e.preventDefault()
+      store.pickRandomMeme()
     }
   }
 
@@ -35,7 +84,9 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
   // Escape -> close modals or clear selection
   if (e.key === 'Escape') {
-    if (showTagManager.value) {
+    if (showPasteModal.value) {
+      showPasteModal.value = false
+    } else if (showTagManager.value) {
       showTagManager.value = false
     } else if (showBatchTagModal.value) {
       showBatchTagModal.value = false
@@ -50,28 +101,45 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 onMounted(() => {
   store.init()
   window.addEventListener('keydown', handleGlobalKeydown)
+  window.addEventListener('paste', checkAndHandlePaste as any)
 })
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleGlobalKeydown)
+  window.removeEventListener('paste', checkAndHandlePaste as any)
 })
 </script>
 
 <template>
   <div class="flex h-screen w-screen overflow-hidden bg-dark-900 text-dark-100 antialiased font-sans">
-    <!-- Left Navigation Sidebar -->
-    <Sidebar @openTagManager="showTagManager = true" />
+    <!-- Left Sidebar -->
+    <Sidebar @open-tag-manager="showTagManager = true" />
 
     <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-      <Topbar @openBatchTagModal="showBatchTagModal = true" />
+    <main class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <Topbar @open-batch-tag-modal="showBatchTagModal = true" />
       <MemeGrid />
-    </div>
+    </main>
 
-    <!-- Modals & Overlays -->
+    <!-- Modals & Feedback Overlays -->
     <MemeDetailModal />
-    <TagManagerModal v-if="showTagManager" @close="showTagManager = false" />
-    <BatchTagModal v-if="showBatchTagModal" @close="showBatchTagModal = false" />
+    
+    <TagManagerModal
+      :visible="showTagManager"
+      @close="showTagManager = false"
+    />
+
+    <BatchTagModal
+      :visible="showBatchTagModal"
+      @close="showBatchTagModal = false"
+    />
+
+    <PasteMemeModal
+      :visible="showPasteModal"
+      :image-data-url="pastedImageDataUrl"
+      @close="showPasteModal = false"
+    />
+
     <Toast />
   </div>
 </template>

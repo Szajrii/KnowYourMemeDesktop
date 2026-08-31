@@ -18,7 +18,9 @@ import {
   HardDrive,
   Pencil,
   Check,
-  FileText
+  FileText,
+  Star,
+  Flame
 } from 'lucide-vue-next'
 
 const store = useMemeStore()
@@ -357,6 +359,34 @@ onUnmounted(() => {
                     <Calendar class="w-3 h-3" /> Zmodyfikowano
                   </span>
                   <span class="font-medium text-dark-200">{{ formatDate(meme.modifiedAt) }}</span>
+                </div>
+              </div>
+
+              <!-- Rating & Usage Counter -->
+              <div class="flex items-center justify-between p-2.5 bg-dark-900/80 rounded-xl border border-dark-700">
+                <div class="flex items-center gap-1">
+                  <span class="text-[11px] font-semibold text-dark-400 mr-1.5">Ocena:</span>
+                  <button
+                    v-for="star in 5"
+                    :key="star"
+                    @click="store.setMemeRating(meme, (meme.rating === star ? 0 : star))"
+                    class="p-0.5 hover:scale-110 transition-transform"
+                    :title="`Oceń na ${star} / 5`"
+                  >
+                    <Star
+                      class="w-4 h-4"
+                      :class="[
+                        (meme.rating || 0) >= star
+                          ? 'fill-amber-400 text-amber-400'
+                          : 'text-dark-600 hover:text-amber-400/50'
+                      ]"
+                    />
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-1.5 text-xs text-amber-400 font-medium">
+                  <Flame class="w-4 h-4 text-orange-400" />
+                  <span>Użyto: <strong class="font-mono text-dark-100">{{ meme.usedCount || 0 }}</strong></span>
                 </div>
               </div>
 

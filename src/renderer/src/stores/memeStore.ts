@@ -134,6 +134,12 @@ export const useMemeStore = defineStore('meme', {
         case 'size_asc':
           result.sort((a, b) => a.size - b.size)
           break
+        case 'used_desc':
+          result.sort((a, b) => (b.usedCount || 0) - (a.usedCount || 0))
+          break
+        case 'rating_desc':
+          result.sort((a, b) => (b.rating || 0) - (a.rating || 0))
+          break
         case 'random':
           result.sort(() => Math.random() - 0.5)
           break
@@ -376,11 +382,68 @@ export const useMemeStore = defineStore('meme', {
       }
     },
 
+    async incrementUsed(meme: MemeItem) {
+      meme.usedCount = (meme.usedCount || 0) + 1
+      if (this.selectedMeme && this.selectedMeme.path === meme.path) {
+        this.selectedMeme.usedCount = meme.usedCount
+      }
+      if (window.electronAPI) {
+        await window.electronAPI.incrementUsedCount(meme.path)
+      }
+    },
+
+    async setMemeRating(meme: MemeItem, rating: number) {
+      meme.rating = rating
+      if (this.selectedMeme && this.selectedMeme.path === meme.path) {
+        this.selectedMeme.rating = rating
+      }
+      if (window.electronAPI) {
+        await window.electronAPI.updateMeme(meme.path, { rating })
+        this.showToast(`Ustawiono ocenę: ${rating} ⭐`, 'success')
+      }
+    },
+
+    pickRandomMeme() {
+      const list = this.filteredMemes
+      if (list.length === 0) {
+        this.showToast('Brak memów do wylosowania', 'info')
+        return
+      }
+      const randomIndex = Math.floor(Math.random() * list.length)
+      this.selectedMeme = list[randomIndex]
+      this.showToast(`Wylosowano mema: ${this.selectedMeme.name} 🎲`, 'info')
+    },
+
+    startDrag(meme: MemeItem) {
+      if (window.electronAPI) {
+        window.electronAPI.startDrag(meme.path)
+      }
+    },
+
+    async savePastedMeme(payload: { folderPath: string; fileName: string; base64Data: string; tags: string[]; description?: string }): Promise<boolean> {
+      if (!window.electronAPI) return false
+      try {
+        const res = await window.electronAPI.savePastedImage(payload)
+        if (res.success && res.meme) {
+          this.memes.unshift(res.meme)
+          this.showToast('Nowy mem zapisany ze schowka!', 'success')
+          return true
+        } else {
+          this.showToast(res.message || 'Błąd zapisu pliku ze schowka', 'error')
+          return false
+        }
+      } catch (e: any) {
+        this.showToast(`Błąd: ${e.message}`, 'error')
+        return false
+      }
+    },
+
     async copyMemeToClipboard(meme: MemeItem) {
       if (!window.electronAPI) return
       try {
         const res = await window.electronAPI.copyImageToClipboard(meme.path)
         if (res.success) {
+          this.incrementUsed(meme)
           this.showToast(
             res.mode === 'image'
               ? 'Obraz skopiowany do schowka! Wklej go (Ctrl+V) w Messengerze / Discordzie.'
@@ -415,6 +478,7 @@ export const useMemeStore = defineStore('meme', {
         const formatted = parts.join('\n')
 
         await window.electronAPI.copyMetadataToClipboard(formatted)
+        this.incrementUsed(meme)
         this.showToast('Skopiowano tekst i tagi do schowka!', 'success')
       } catch (e: any) {
         this.showToast(`Błąd: ${e.message}`, 'error')

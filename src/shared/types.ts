@@ -12,7 +12,9 @@ export interface MemeItem {
   tags: string[]
   isFavorite: boolean
   description?: string
-  rating?: number
+  rating?: number // 1-5 stars
+  usedCount?: number // times copied or shared
+  ocrText?: string // text extracted via OCR
   width?: number
   height?: number
   duration?: number
@@ -40,6 +42,8 @@ export type SortOption =
   | 'name_desc'
   | 'size_desc'
   | 'size_asc'
+  | 'used_desc'
+  | 'rating_desc'
   | 'random'
 
 export interface FilterOptions {

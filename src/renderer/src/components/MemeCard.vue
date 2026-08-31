@@ -10,7 +10,9 @@ import {
   Film,
   Sparkles,
   Check,
-  Tag as TagIcon
+  Tag as TagIcon,
+  Star,
+  Flame
 } from 'lucide-vue-next'
 
 const props = defineProps<{
@@ -59,6 +61,8 @@ function getTagColor(tagName: string) {
 
 <template>
   <div
+    draggable="true"
+    @dragstart="store.startDrag(meme)"
     class="group relative flex flex-col bg-dark-800 border rounded-xl overflow-hidden shadow-md transition-all duration-200 cursor-pointer"
     :class="[
       isSelected
@@ -98,20 +102,39 @@ function getTagColor(tagName: string) {
         class="w-full h-full object-contain pointer-events-none"
       />
 
-      <!-- Type Badge -->
-      <div class="absolute top-2 left-2 flex items-center gap-1 z-10">
-        <span
-          v-if="meme.type === 'gif'"
-          class="px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase bg-brand-accent/90 text-white rounded-md backdrop-blur-md shadow"
-        >
-          GIF
-        </span>
-        <span
-          v-else-if="meme.type === 'video'"
-          class="px-2 py-0.5 text-[10px] font-bold uppercase bg-brand-600/90 text-white rounded-md backdrop-blur-md shadow flex items-center gap-1"
-        >
-          <Film class="w-3 h-3" /> Wideo
-        </span>
+      <!-- Type & Stats Badges (Top Left) -->
+      <div class="absolute top-2 left-2 flex flex-col gap-1 z-10">
+        <div class="flex items-center gap-1">
+          <span
+            v-if="meme.type === 'gif'"
+            class="px-2 py-0.5 text-[10px] font-extrabold tracking-wider uppercase bg-brand-accent/90 text-white rounded-md backdrop-blur-md shadow"
+          >
+            GIF
+          </span>
+          <span
+            v-else-if="meme.type === 'video'"
+            class="px-2 py-0.5 text-[10px] font-bold uppercase bg-brand-600/90 text-white rounded-md backdrop-blur-md shadow flex items-center gap-1"
+          >
+            <Film class="w-3 h-3" /> Wideo
+          </span>
+          
+          <span
+            v-if="meme.rating && meme.rating > 0"
+            class="px-1.5 py-0.5 text-[10px] font-bold bg-dark-900/90 border border-amber-500/40 text-amber-300 rounded-md backdrop-blur-md shadow flex items-center gap-0.5"
+          >
+            <Star class="w-2.5 h-2.5 fill-amber-400 text-amber-400" />
+            <span>{{ meme.rating }}</span>
+          </span>
+
+          <span
+            v-if="meme.usedCount && meme.usedCount > 0"
+            class="px-1.5 py-0.5 text-[10px] font-bold bg-dark-900/90 border border-orange-500/40 text-orange-300 rounded-md backdrop-blur-md shadow flex items-center gap-0.5"
+            title="Licznik użyć"
+          >
+            <Flame class="w-2.5 h-2.5 text-orange-400" />
+            <span>{{ meme.usedCount }}</span>
+          </span>
+        </div>
       </div>
 
       <!-- Quick Action Overlay Buttons (Top Right) -->

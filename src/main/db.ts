@@ -125,6 +125,28 @@ class Database {
     return updated
   }
 
+  public incrementUsedCount(filePath: string): MemeItem | null {
+    const existing = this.data.memes[filePath]
+    if (!existing) return null
+    existing.usedCount = (existing.usedCount || 0) + 1
+    this.save()
+    return existing
+  }
+
+  public addDirectMeme(meme: MemeItem): MemeItem {
+    this.data.memes[meme.path] = meme
+    if (meme.tags) {
+      for (const tag of meme.tags) {
+        const norm = tag.toLowerCase().trim()
+        if (norm && !this.data.tags[norm]) {
+          this.data.tags[norm] = { color: getRandomTagColor() }
+        }
+      }
+    }
+    this.save()
+    return meme
+  }
+
   public batchUpdateTags(paths: string[], addTags: string[], removeTags: string[]) {
     const normAdd = addTags.map(t => t.toLowerCase().trim()).filter(Boolean)
     const normRemove = removeTags.map(t => t.toLowerCase().trim()).filter(Boolean)
