@@ -31,8 +31,12 @@ export function registerIpcHandlers(win: BrowserWindow) {
   })
 
   ipcMain.handle('db:batchUpdateTags', async (_event, paths: string[], addTags: string[], removeTags: string[]) => {
-    db.batchUpdateTags(paths, addTags, removeTags)
-    return db.getData()
+    const safePaths = Array.isArray(paths) ? paths.map(p => String(p)) : []
+    const safeAdd = Array.isArray(addTags) ? addTags.map(t => String(t)) : []
+    const safeRemove = Array.isArray(removeTags) ? removeTags.map(t => String(t)) : []
+    db.batchUpdateTags(safePaths, safeAdd, safeRemove)
+    win.webContents.send('memes:updated', db.getMemes())
+    return JSON.parse(JSON.stringify(db.getData()))
   })
 
   ipcMain.handle('db:setTagColor', async (_event, tagName: string, color: string) => {

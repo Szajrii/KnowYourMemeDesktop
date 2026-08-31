@@ -423,8 +423,9 @@ export const useMemeStore = defineStore('meme', {
     async batchAddTags(tags: string[]) {
       if (!window.electronAPI || this.selectedPaths.size === 0) return
       try {
-        const paths = Array.from(this.selectedPaths)
-        const updatedData = await window.electronAPI.batchUpdateTags(paths, tags, [])
+        const paths = Array.from(this.selectedPaths).map(p => String(p))
+        const cleanTags = tags.map(t => String(t).trim()).filter(Boolean)
+        const updatedData = await window.electronAPI.batchUpdateTags(paths, cleanTags, [])
         this.setDbData(updatedData)
         this.showToast(`Dodano tagi do ${paths.length} memów`, 'success')
       } catch (e: any) {
@@ -435,8 +436,9 @@ export const useMemeStore = defineStore('meme', {
     async batchRemoveTags(tags: string[]) {
       if (!window.electronAPI || this.selectedPaths.size === 0) return
       try {
-        const paths = Array.from(this.selectedPaths)
-        const updatedData = await window.electronAPI.batchUpdateTags(paths, [], tags)
+        const paths = Array.from(this.selectedPaths).map(p => String(p))
+        const cleanTags = tags.map(t => String(t).trim()).filter(Boolean)
+        const updatedData = await window.electronAPI.batchUpdateTags(paths, [], cleanTags)
         this.setDbData(updatedData)
         this.showToast(`Usunięto tagi z ${paths.length} memów`, 'info')
       } catch (e: any) {

@@ -8,7 +8,7 @@ const api = {
   updateMeme: (filePath: string, updates: Partial<MemeItem>): Promise<MemeItem | null> => 
     ipcRenderer.invoke('db:updateMeme', filePath, updates),
   batchUpdateTags: (paths: string[], addTags: string[], removeTags: string[]): Promise<AppDatabaseData> => 
-    ipcRenderer.invoke('db:batchUpdateTags', paths, addTags, removeTags),
+    ipcRenderer.invoke('db:batchUpdateTags', JSON.parse(JSON.stringify(paths)), JSON.parse(JSON.stringify(addTags)), JSON.parse(JSON.stringify(removeTags))),
   setTagColor: (tagName: string, color: string): Promise<Record<string, { color: string }>> => 
     ipcRenderer.invoke('db:setTagColor', tagName, color),
   deleteTag: (tagName: string): Promise<AppDatabaseData> => 
