@@ -30,6 +30,8 @@ export const useMemeStore = defineStore('meme', {
     ocrProgressText: '',
     isFindingDuplicates: false,
     duplicateGroups: [] as any[],
+    studioMeme: null as MemeItem | null,
+    showStudioModal: false,
     toastMessage: null as string | null,
     toastType: 'info' as 'info' | 'success' | 'error',
     toastTimeout: null as any
@@ -269,6 +271,16 @@ export const useMemeStore = defineStore('meme', {
         this.showToast(`Błąd: ${e.message}`, 'error')
         return []
       }
+    },
+
+    openStudio(meme?: MemeItem | null) {
+      this.studioMeme = meme || null
+      this.showStudioModal = true
+    },
+
+    closeStudio() {
+      this.showStudioModal = false
+      this.studioMeme = null
     },
 
     setDbData(data: AppDatabaseData) {

@@ -532,6 +532,17 @@ onUnmounted(() => {
               <span>Kopiuj mema do wklejenia (Messenger/Discord)</span>
             </button>
 
+            <!-- Edit in Meme Studio (For image memes) -->
+            <button
+              v-if="meme.type === 'image'"
+              @click="store.openStudio(meme)"
+              class="w-full py-2 bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-purple-200 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+              title="Otwórz tego mema w edytorze Meme Studio"
+            >
+              <Sparkles class="w-3.5 h-3.5 text-purple-400" />
+              <span>Edytuj w Meme Studio</span>
+            </button>
+
             <!-- Copy Metadata / Text + Tags -->
             <button
               @click="store.copyMemeMetadata(meme)"

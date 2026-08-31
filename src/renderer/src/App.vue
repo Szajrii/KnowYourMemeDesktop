@@ -9,6 +9,7 @@ import TagManagerModal from './components/TagManagerModal.vue'
 import BatchTagModal from './components/BatchTagModal.vue'
 import PasteMemeModal from './components/PasteMemeModal.vue'
 import DuplicateFinderModal from './components/DuplicateFinderModal.vue'
+import MemeStudioModal from './components/MemeStudioModal.vue'
 import Toast from './components/Toast.vue'
 
 const store = useMemeStore()
@@ -86,7 +87,9 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
   // Escape -> close modals or clear selection
   if (e.key === 'Escape') {
-    if (showDuplicateModal.value) {
+    if (store.showStudioModal) {
+      store.closeStudio()
+    } else if (showDuplicateModal.value) {
       showDuplicateModal.value = false
     } else if (showPasteModal.value) {
       showPasteModal.value = false
@@ -144,6 +147,12 @@ onUnmounted(() => {
     <DuplicateFinderModal
       v-if="showDuplicateModal"
       @close="showDuplicateModal = false"
+    />
+
+    <MemeStudioModal
+      :visible="store.showStudioModal"
+      :source-meme="store.studioMeme"
+      @close="store.closeStudio()"
     />
 
     <PasteMemeModal

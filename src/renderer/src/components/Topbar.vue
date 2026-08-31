@@ -52,6 +52,16 @@ function toggleSelectAll() {
 
       <!-- Quick Action Controls -->
       <div class="flex items-center gap-2.5">
+        <!-- Meme Generator / Studio Button -->
+        <button
+          @click="store.openStudio()"
+          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-500/20 to-indigo-500/20 hover:from-purple-500/30 hover:to-indigo-500/30 border border-purple-500/40 text-purple-300 hover:text-purple-200 text-xs font-semibold transition-all active:scale-95 shadow-sm"
+          title="Stwórz nowego mema lub edytuj w Meme Studio"
+        >
+          <Sparkles class="w-4 h-4 text-purple-400" />
+          <span>Generator</span>
+        </button>
+
         <!-- Random Meme Button -->
         <button
           @click="store.pickRandomMeme"

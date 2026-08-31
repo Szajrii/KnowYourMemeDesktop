@@ -429,4 +429,19 @@ describe('Meme Pinia Store', () => {
     expect(duplicates.length).toBe(1)
     expect(duplicates[0].memes.length).toBe(2)
   })
+
+  it('should open and close Meme Studio modal', () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    expect(store.showStudioModal).toBe(false)
+    store.openStudio(mockMemes[0])
+
+    expect(store.showStudioModal).toBe(true)
+    expect(store.studioMeme?.name).toBe('doge.png')
+
+    store.closeStudio()
+    expect(store.showStudioModal).toBe(false)
+    expect(store.studioMeme).toBeNull()
+  })
 })
