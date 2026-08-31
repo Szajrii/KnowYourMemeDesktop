@@ -203,6 +203,7 @@ function handleStudioPaste(e: ClipboardEvent) {
         const file = e.clipboardData.items[i].getAsFile()
         if (file) {
           e.preventDefault()
+          e.stopPropagation()
           const reader = new FileReader()
           reader.onload = (ev) => {
             const dataUrl = ev.target?.result as string

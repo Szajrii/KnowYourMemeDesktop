@@ -26,6 +26,20 @@ const showStatsModal = ref(false)
 const pastedImageDataUrl = ref('')
 
 async function checkAndHandlePaste(e?: ClipboardEvent) {
+  // Do not trigger global paste modal when another modal (e.g. Meme Studio, Detail, Launcher) is open
+  if (
+    store.showStudioModal ||
+    store.selectedMeme ||
+    showLauncherModal.value ||
+    showStatsModal.value ||
+    showBackupModal.value ||
+    showDuplicateModal.value ||
+    showTagManager.value ||
+    showBatchTagModal.value
+  ) {
+    return
+  }
+
   const active = document.activeElement
   if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA')) {
     return // allow default text paste inside text fields
