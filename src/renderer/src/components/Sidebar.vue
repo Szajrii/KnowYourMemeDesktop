@@ -38,11 +38,19 @@ function setFolderFilter(folderPath: string | null) {
   }
 }
 
-function setMediaType(type: 'all' | 'image' | 'gif' | 'video') {
-  store.filter.mediaType = type
-  if (type !== 'all') {
+function toggleMediaType(type: 'image' | 'gif' | 'video') {
+  if (store.filter.mediaType === type && !store.filter.onlyFavorites) {
+    // Toggle back to all
+    store.filter.mediaType = 'all'
+  } else {
+    store.filter.mediaType = type
     store.filter.onlyFavorites = false
   }
+}
+
+function showAllMedia() {
+  store.filter.mediaType = 'all'
+  store.filter.onlyFavorites = false
 }
 
 function setFavoritesOnly() {
@@ -80,7 +88,7 @@ function setFavoritesOnly() {
     <!-- Navigation / Quick Filters -->
     <div class="px-3 py-3 border-b border-dark-700/80 space-y-1">
       <button
-        @click="setMediaType('all'); store.filter.onlyFavorites = false"
+        @click="showAllMedia"
         class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all"
         :class="[
           store.filter.mediaType === 'all' && !store.filter.onlyFavorites
@@ -121,14 +129,14 @@ function setFavoritesOnly() {
 
       <div class="pt-2 grid grid-cols-3 gap-1">
         <button
-          @click="setMediaType('image')"
+          @click="toggleMediaType('image')"
           class="flex flex-col items-center justify-center p-2 rounded-lg text-[11px] font-medium border transition-all"
           :class="[
             store.filter.mediaType === 'image' && !store.filter.onlyFavorites
               ? 'bg-dark-700 border-brand-500 text-brand-400'
               : 'border-transparent text-dark-400 hover:bg-dark-700/60 hover:text-dark-200'
           ]"
-          title="Tylko obrazy"
+          title="Filtruj: Tylko obrazy (kliknij ponownie, aby wyczyścić)"
         >
           <Image class="w-4 h-4 mb-1" />
           <span>Obrazy</span>
@@ -136,14 +144,14 @@ function setFavoritesOnly() {
         </button>
 
         <button
-          @click="setMediaType('gif')"
+          @click="toggleMediaType('gif')"
           class="flex flex-col items-center justify-center p-2 rounded-lg text-[11px] font-medium border transition-all"
           :class="[
             store.filter.mediaType === 'gif' && !store.filter.onlyFavorites
               ? 'bg-dark-700 border-brand-accent text-brand-accent'
               : 'border-transparent text-dark-400 hover:bg-dark-700/60 hover:text-dark-200'
           ]"
-          title="Tylko GIFy"
+          title="Filtruj: Tylko GIFy (kliknij ponownie, aby wyczyścić)"
         >
           <Sparkles class="w-4 h-4 mb-1" />
           <span>GIFy</span>
@@ -151,14 +159,14 @@ function setFavoritesOnly() {
         </button>
 
         <button
-          @click="setMediaType('video')"
+          @click="toggleMediaType('video')"
           class="flex flex-col items-center justify-center p-2 rounded-lg text-[11px] font-medium border transition-all"
           :class="[
             store.filter.mediaType === 'video' && !store.filter.onlyFavorites
               ? 'bg-dark-700 border-brand-500 text-brand-400'
               : 'border-transparent text-dark-400 hover:bg-dark-700/60 hover:text-dark-200'
           ]"
-          title="Tylko wideo"
+          title="Filtruj: Tylko wideo (kliknij ponownie, aby wyczyścić)"
         >
           <Film class="w-4 h-4 mb-1" />
           <span>Wideo</span>
