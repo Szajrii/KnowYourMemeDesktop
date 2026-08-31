@@ -104,26 +104,30 @@ export function registerIpcHandlers(win: BrowserWindow) {
           }
 
           if (!img.isEmpty()) {
-            // Clear clipboard completely so apps (like Messenger/Discord) do not paste text path
             clipboard.clear()
             clipboard.writeImage(img)
+            if (process.platform === 'win32') {
+              try {
+                const fileNameWBuffer = Buffer.from(filePath + '\0\0', 'ucs2')
+                clipboard.writeBuffer('FileNameW', fileNameWBuffer)
+              } catch (_) {}
+            }
             return { success: true, mode: 'image' }
           }
         } catch (readErr) {
           console.error('Failed to read image buffer, trying createFromPath:', readErr)
-          const img = nativeImage.createFromPath(filePath)
-          if (!img.isEmpty()) {
-            clipboard.clear()
-            clipboard.writeImage(img)
-            return { success: true, mode: 'image' }
-          }
         }
       }
       
-      // Fallback for videos or other formats: write text path
+      // Native Windows file clipboard format (FileNameW / CF_HDROP) for audio, video and other files
       clipboard.clear()
-      clipboard.writeText(filePath)
-      return { success: true, mode: 'path' }
+      if (process.platform === 'win32') {
+        const fileNameWBuffer = Buffer.from(filePath + '\0\0', 'ucs2')
+        clipboard.writeBuffer('FileNameW', fileNameWBuffer)
+      } else {
+        clipboard.writeText(filePath)
+      }
+      return { success: true, mode: 'file' }
     } catch (e: any) {
       console.error('Error copying to clipboard:', e)
       return { success: false, message: e.message }

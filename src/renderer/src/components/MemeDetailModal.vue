@@ -288,10 +288,10 @@ onUnmounted(() => {
                 <button
                   @click="store.copyMemeToClipboard(meme)"
                   class="p-2 rounded-xl bg-dark-700/50 border border-dark-600 text-dark-300 hover:text-brand-400 hover:border-brand-500/40 transition-all flex items-center gap-1.5 text-xs font-semibold"
-                  title="Kopiuj obraz do wklejenia w Messenger / Discord"
+                  :title="meme.type === 'audio' ? 'Kopiuj plik dźwiękowy do wklejenia w Messengerze / Discordzie' : meme.type === 'video' ? 'Kopiuj plik wideo' : 'Kopiuj obraz do wklejenia'"
                 >
                   <Copy class="w-4 h-4" />
-                  <span>Kopiuj obraz</span>
+                  <span>{{ meme.type === 'audio' ? 'Kopiuj dźwięk' : meme.type === 'video' ? 'Kopiuj wideo' : meme.type === 'gif' ? 'Kopiuj GIF' : 'Kopiuj obraz' }}</span>
                 </button>
 
                 <button

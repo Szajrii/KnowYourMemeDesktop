@@ -530,12 +530,8 @@ export const useMemeStore = defineStore('meme', {
         const res = await window.electronAPI.copyImageToClipboard(meme.path)
         if (res.success) {
           this.incrementUsed(meme)
-          this.showToast(
-            res.mode === 'image'
-              ? 'Obraz skopiowany do schowka! Wklej go (Ctrl+V) w Messengerze / Discordzie.'
-              : 'Ścieżka pliku skopiowana do schowka!',
-            'success'
-          )
+          const typeName = meme.type === 'audio' ? 'Plik dźwiękowy' : meme.type === 'video' ? 'Plik wideo' : meme.type === 'gif' ? 'GIF' : 'Obraz'
+          this.showToast(`${typeName} skopiowany do schowka! Gotowy do wklejenia (Ctrl+V).`, 'success')
         } else {
           this.showToast(res.message || 'Nie udało się skopiować', 'error')
         }
