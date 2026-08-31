@@ -25,6 +25,8 @@ const api = {
 
   copyImageToClipboard: (filePath: string): Promise<{ success: boolean; mode?: string; message?: string }> => 
     ipcRenderer.invoke('system:copyImageToClipboard', filePath),
+  copyMetadataToClipboard: (text: string): Promise<{ success: boolean }> => 
+    ipcRenderer.invoke('system:copyMetadataToClipboard', text),
   copyPathToClipboard: (filePath: string): Promise<{ success: boolean }> => 
     ipcRenderer.invoke('system:copyPathToClipboard', filePath),
   openInExplorer: (filePath: string): Promise<boolean> => 

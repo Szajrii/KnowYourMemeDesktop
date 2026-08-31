@@ -1,6 +1,7 @@
 import { ipcMain, dialog, shell, clipboard, nativeImage, BrowserWindow } from 'electron'
 import fs from 'fs'
 import path from 'path'
+import { pathToFileURL } from 'url'
 import { db } from './db'
 import { mediaScanner } from './scanner'
 import { FolderConfig, MemeItem, AppDatabaseData } from '../shared/types'
@@ -86,21 +87,35 @@ export function registerIpcHandlers(win: BrowserWindow) {
       }
 
       const ext = path.extname(filePath).toLowerCase()
-      if (['.jpg', '.jpeg', '.png', '.bmp', '.webp'].includes(ext)) {
+      const fileUrl = pathToFileURL(filePath).toString()
+
+      if (['.jpg', '.jpeg', '.png', '.bmp', '.webp', '.gif'].includes(ext)) {
         const img = nativeImage.createFromPath(filePath)
         if (!img.isEmpty()) {
-          clipboard.writeImage(img)
+          clipboard.write({
+            image: img,
+            html: `<img src="${fileUrl}" alt="${path.basename(filePath)}" />`,
+            text: filePath
+          })
           return { success: true, mode: 'image' }
         }
       }
       
-      // Fallback or for GIFs/videos: write file path / buffer
-      clipboard.writeText(filePath)
+      // Fallback or for videos: write file path & file url
+      clipboard.write({
+        text: filePath,
+        html: `<a href="${fileUrl}">${path.basename(filePath)}</a>`
+      })
       return { success: true, mode: 'path' }
     } catch (e: any) {
       console.error('Error copying to clipboard:', e)
       return { success: false, message: e.message }
     }
+  })
+
+  ipcMain.handle('system:copyMetadataToClipboard', async (_event, text: string) => {
+    clipboard.writeText(text)
+    return { success: true }
   })
 
   ipcMain.handle('system:copyPathToClipboard', async (_event, filePath: string) => {

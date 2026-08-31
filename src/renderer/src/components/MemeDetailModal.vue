@@ -17,7 +17,8 @@ import {
   Calendar,
   HardDrive,
   Pencil,
-  Check
+  Check,
+  FileText
 } from 'lucide-vue-next'
 
 const store = useMemeStore()
@@ -267,10 +268,19 @@ onUnmounted(() => {
                 <button
                   @click="store.copyMemeToClipboard(meme)"
                   class="p-2 rounded-xl bg-dark-700/50 border border-dark-600 text-dark-300 hover:text-brand-400 hover:border-brand-500/40 transition-all flex items-center gap-1.5 text-xs font-semibold"
-                  title="Kopiuj do schowka"
+                  title="Kopiuj obraz do wklejenia w Messenger / Discord"
                 >
                   <Copy class="w-4 h-4" />
-                  <span>Kopiuj</span>
+                  <span>Kopiuj obraz</span>
+                </button>
+
+                <button
+                  @click="store.copyMemeMetadata(meme)"
+                  class="p-2 rounded-xl bg-dark-700/50 border border-dark-600 text-dark-300 hover:text-brand-400 hover:border-brand-500/40 transition-all flex items-center gap-1.5 text-xs font-semibold"
+                  title="Kopiuj nazwę, tagi i opis jako tekst"
+                >
+                  <FileText class="w-4 h-4" />
+                  <span>Kopiuj tekst</span>
                 </button>
               </div>
 
@@ -444,41 +454,64 @@ onUnmounted(() => {
 
           <!-- Bottom Action Buttons -->
           <div class="p-4 border-t border-dark-700/80 bg-dark-900/50 space-y-2">
+            <!-- Copy Image / Media (Primary to paste directly in Messenger/Discord) -->
             <button
               @click="store.copyMemeToClipboard(meme)"
               class="w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+              title="Kopiuje obraz do schowka, gotowy do wklejenia w Messengerze / Discordzie"
             >
               <Copy class="w-4 h-4" />
-              <span>Kopiuj mema do schowka</span>
+              <span>Kopiuj mema do wklejenia (Messenger/Discord)</span>
+            </button>
+
+            <!-- Copy Metadata / Text + Tags -->
+            <button
+              @click="store.copyMemeMetadata(meme)"
+              class="w-full py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-dark-200 hover:text-white rounded-xl text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+              title="Kopiuje nazwę, tagi i opis jako sformatowany tekst"
+            >
+              <FileText class="w-3.5 h-3.5 text-brand-400" />
+              <span>Kopiuj opis i tagi (Tekst)</span>
             </button>
 
             <div class="grid grid-cols-2 gap-2">
               <button
+                @click="store.copyPathToClipboard(meme)"
+                class="py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-dark-300 hover:text-dark-100 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                title="Kopiuj ścieżkę do pliku na dysku"
+              >
+                <HardDrive class="w-3.5 h-3.5" />
+                <span>Kopiuj ścieżkę</span>
+              </button>
+
+              <button
                 @click="store.openInExplorer(meme)"
-                class="py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-dark-200 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
+                class="py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-dark-300 hover:text-dark-100 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
                 title="Pokaż plik w Eksploratorze Windows"
               >
                 <FolderOpen class="w-3.5 h-3.5" />
                 <span>Eksplorator</span>
               </button>
-
-              <button
-                @click="store.openExternal(meme)"
-                class="py-2 bg-dark-800 hover:bg-dark-700 border border-dark-700 text-dark-200 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
-                title="Otwórz w domyślnej przeglądarce"
-              >
-                <ExternalLink class="w-3.5 h-3.5" />
-                <span>Otwórz w app</span>
-              </button>
             </div>
 
-            <button
-              @click="store.deleteMeme(meme)"
-              class="w-full py-1.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-colors"
-            >
-              <Trash2 class="w-3.5 h-3.5" />
-              <span>Przenieś plik do kosza</span>
-            </button>
+            <div class="flex items-center justify-between pt-1">
+              <button
+                @click="store.openExternal(meme)"
+                class="text-[11px] text-dark-400 hover:text-dark-200 flex items-center gap-1"
+                title="Otwórz w domyślnej aplikacji systemowej"
+              >
+                <ExternalLink class="w-3 h-3" />
+                <span>Otwórz w aplikacji domyślnej</span>
+              </button>
+
+              <button
+                @click="store.deleteMeme(meme)"
+                class="text-[11px] text-rose-400 hover:text-rose-300 hover:underline flex items-center gap-1"
+              >
+                <Trash2 class="w-3 h-3" />
+                <span>Usuń do kosza</span>
+              </button>
+            </div>
           </div>
 
         </div>

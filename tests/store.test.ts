@@ -250,4 +250,23 @@ describe('Meme Pinia Store', () => {
     expect(store.selectedPaths.has('C:\\Memes\\doge_new.png')).toBe(true)
     expect(store.selectedPaths.has(target.path)).toBe(false)
   })
+
+  it('should copy meme metadata and tags as formatted text', async () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    let copiedText = ''
+    window.electronAPI = {
+      copyMetadataToClipboard: async (text: string) => {
+        copiedText = text
+        return { success: true }
+      }
+    } as any
+
+    await store.copyMemeMetadata(mockMemes[0])
+    expect(copiedText).toContain('doge.png')
+    expect(copiedText).toContain('#dank #crypto')
+    expect(copiedText).toContain('Much wow such crypto')
+    expect(store.toastMessage).toContain('Skopiowano')
+  })
 })

@@ -363,6 +363,22 @@ export const useMemeStore = defineStore('meme', {
       }
     },
 
+    async copyMemeMetadata(meme: MemeItem) {
+      if (!window.electronAPI) return
+      try {
+        const tagLine = meme.tags.length > 0 ? meme.tags.map(t => `#${t}`).join(' ') : ''
+        const parts = [meme.name]
+        if (tagLine) parts.push(tagLine)
+        if (meme.description) parts.push(meme.description)
+        const formatted = parts.join('\n')
+
+        await window.electronAPI.copyMetadataToClipboard(formatted)
+        this.showToast('Skopiowano tekst i tagi do schowka!', 'success')
+      } catch (e: any) {
+        this.showToast(`Błąd: ${e.message}`, 'error')
+      }
+    },
+
     async openInExplorer(meme: MemeItem) {
       if (!window.electronAPI) return
       await window.electronAPI.openInExplorer(meme.path)
