@@ -221,4 +221,33 @@ describe('Meme Pinia Store', () => {
     expect(store.toastMessage).toBe('Test Toast')
     expect(store.toastType).toBe('success')
   })
+
+  it('should handle meme renaming via electronAPI', async () => {
+    const store = useMemeStore()
+    store.setDbData(mockDbData)
+
+    const target = mockMemes[0]
+    store.selectedMeme = target
+    store.selectedPaths.add(target.path)
+
+    // Mock window.electronAPI.renameFile
+    window.electronAPI = {
+      renameFile: async (_oldPath: string, newFileName: string) => {
+        return {
+          success: true,
+          updatedMeme: {
+            ...target,
+            path: `C:\\Memes\\${newFileName}`,
+            name: newFileName
+          }
+        }
+      }
+    } as any
+
+    const success = await store.renameMeme(target, 'doge_new.png')
+    expect(success).toBe(true)
+    expect(store.selectedMeme?.name).toBe('doge_new.png')
+    expect(store.selectedPaths.has('C:\\Memes\\doge_new.png')).toBe(true)
+    expect(store.selectedPaths.has(target.path)).toBe(false)
+  })
 })

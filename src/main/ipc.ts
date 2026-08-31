@@ -136,4 +136,47 @@ export function registerIpcHandlers(win: BrowserWindow) {
       return { success: false, message: e.message }
     }
   })
+
+  ipcMain.handle('system:renameFile', async (_event, oldPath: string, newFileName: string) => {
+    try {
+      if (!fs.existsSync(oldPath)) {
+        return { success: false, message: 'Plik źródłowy nie istnieje' }
+      }
+
+      const trimmedName = newFileName.trim()
+      if (!trimmedName) {
+        return { success: false, message: 'Nazwa pliku nie może być pusta' }
+      }
+
+      // Check for invalid Windows characters
+      if (/[<>:"/\\|?*]/.test(trimmedName)) {
+        return { success: false, message: 'Nazwa pliku zawiera niedozwolone znaki (< > : " / \\ | ? *)' }
+      }
+
+      const dir = path.dirname(oldPath)
+      const oldExt = path.extname(oldPath)
+      let finalName = trimmedName
+
+      // If user did not specify extension, keep the original extension
+      if (!path.extname(finalName) && oldExt) {
+        finalName += oldExt
+      }
+
+      const newPath = path.join(dir, finalName)
+      const newExt = path.extname(newPath).toLowerCase()
+
+      // If destination already exists and is different from oldPath
+      if (oldPath.toLowerCase() !== newPath.toLowerCase() && fs.existsSync(newPath)) {
+        return { success: false, message: 'Plik o takiej nazwie już istnieje w tym folderze' }
+      }
+
+      await fs.promises.rename(oldPath, newPath)
+      const updatedMeme = db.renameMemePath(oldPath, newPath, finalName, newExt)
+
+      return { success: true, updatedMeme }
+    } catch (e: any) {
+      console.error('Failed to rename file:', e)
+      return { success: false, message: e.message || 'Błąd podczas zmiany nazwy pliku' }
+    }
+  })
 }

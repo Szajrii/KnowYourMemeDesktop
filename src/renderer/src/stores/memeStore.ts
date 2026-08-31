@@ -388,6 +388,35 @@ export const useMemeStore = defineStore('meme', {
       }
     },
 
+    async renameMeme(meme: MemeItem, newFileName: string): Promise<boolean> {
+      if (!window.electronAPI) return false
+      try {
+        const res = await window.electronAPI.renameFile(meme.path, newFileName)
+        if (res.success && res.updatedMeme) {
+          const oldPath = meme.path
+          const index = this.memes.findIndex(m => m.path === oldPath)
+          if (index !== -1) {
+            this.memes[index] = res.updatedMeme
+          }
+          if (this.selectedMeme?.path === oldPath) {
+            this.selectedMeme = res.updatedMeme
+          }
+          if (this.selectedPaths.has(oldPath)) {
+            this.selectedPaths.delete(oldPath)
+            this.selectedPaths.add(res.updatedMeme.path)
+          }
+          this.showToast('Zmieniono nazwę pliku', 'success')
+          return true
+        } else {
+          this.showToast(res.message || 'Nie udało się zmienić nazwy pliku', 'error')
+          return false
+        }
+      } catch (e: any) {
+        this.showToast(`Błąd: ${e.message}`, 'error')
+        return false
+      }
+    },
+
     toggleTagFilter(tagName: string) {
       const idx = this.filter.selectedTags.indexOf(tagName)
       if (idx !== -1) {

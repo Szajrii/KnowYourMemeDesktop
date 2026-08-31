@@ -33,6 +33,8 @@ const api = {
     ipcRenderer.invoke('system:openExternal', filePath),
   deleteFile: (filePath: string): Promise<{ success: boolean; message?: string }> => 
     ipcRenderer.invoke('system:deleteFile', filePath),
+  renameFile: (oldPath: string, newFileName: string): Promise<{ success: boolean; updatedMeme?: MemeItem; message?: string }> => 
+    ipcRenderer.invoke('system:renameFile', oldPath, newFileName),
 
   onMemesUpdated: (callback: (memes: MemeItem[]) => void) => {
     const handler = (_event: any, memes: MemeItem[]) => callback(memes)

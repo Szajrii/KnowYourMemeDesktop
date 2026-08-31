@@ -108,6 +108,23 @@ class Database {
     return updated
   }
 
+  public renameMemePath(oldPath: string, newPath: string, newName: string, newExt: string): MemeItem | null {
+    const existing = this.data.memes[oldPath]
+    if (!existing) return null
+
+    delete this.data.memes[oldPath]
+    const updated: MemeItem = {
+      ...existing,
+      path: newPath,
+      name: newName,
+      extension: newExt,
+      modifiedAt: Date.now()
+    }
+    this.data.memes[newPath] = updated
+    this.save()
+    return updated
+  }
+
   public batchUpdateTags(paths: string[], addTags: string[], removeTags: string[]) {
     const normAdd = addTags.map(t => t.toLowerCase().trim()).filter(Boolean)
     const normRemove = removeTags.map(t => t.toLowerCase().trim()).filter(Boolean)

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useMemeStore } from '../stores/memeStore'
 import { getMediaUrl } from '../utils/media'
 import {
@@ -15,7 +15,9 @@ import {
   Tag as TagIcon,
   Film,
   Calendar,
-  HardDrive
+  HardDrive,
+  Pencil,
+  Check
 } from 'lucide-vue-next'
 
 const store = useMemeStore()
@@ -23,6 +25,9 @@ const newTagInput = ref('')
 const descriptionInput = ref('')
 const tagInputRef = ref<HTMLInputElement | null>(null)
 const showTagSuggestions = ref(false)
+const isEditingName = ref(false)
+const editingNameInput = ref('')
+const editNameInputRef = ref<HTMLInputElement | null>(null)
 
 const meme = computed(() => store.selectedMeme)
 
@@ -33,10 +38,40 @@ watch(
       descriptionInput.value = newMeme.description || ''
       newTagInput.value = ''
       showTagSuggestions.value = false
+      isEditingName.value = false
+      editingNameInput.value = ''
     }
   },
   { immediate: true }
 )
+
+function startEditingName() {
+  if (!meme.value) return
+  editingNameInput.value = meme.value.name
+  isEditingName.value = true
+  nextTick(() => {
+    editNameInputRef.value?.focus()
+    editNameInputRef.value?.select()
+  })
+}
+
+function cancelEditingName() {
+  isEditingName.value = false
+  editingNameInput.value = ''
+}
+
+async function submitRename() {
+  if (!meme.value) return
+  const trimmed = editingNameInput.value.trim()
+  if (!trimmed || trimmed === meme.value.name) {
+    cancelEditingName()
+    return
+  }
+  const success = await store.renameMeme(meme.value, trimmed)
+  if (success) {
+    isEditingName.value = false
+  }
+}
 
 const mediaSrc = computed(() => {
   if (!meme.value) return ''
@@ -251,8 +286,52 @@ onUnmounted(() => {
             <!-- Filename & File Info -->
             <div class="p-4 border-b border-dark-700/80 space-y-3">
               <div>
-                <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Nazwa pliku</span>
-                <h3 class="text-sm font-bold text-dark-100 break-all select-all mt-0.5">{{ meme.name }}</h3>
+                <div class="flex items-center justify-between">
+                  <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Nazwa pliku</span>
+                  <button
+                    v-if="!isEditingName"
+                    @click="startEditingName"
+                    class="text-[11px] text-dark-400 hover:text-brand-400 flex items-center gap-1 transition-colors"
+                    title="Zmień nazwę pliku"
+                  >
+                    <Pencil class="w-3 h-3" />
+                    <span>Zmień nazwę</span>
+                  </button>
+                </div>
+
+                <!-- View Mode -->
+                <h3
+                  v-if="!isEditingName"
+                  class="text-sm font-bold text-dark-100 break-all select-all mt-0.5"
+                >
+                  {{ meme.name }}
+                </h3>
+
+                <!-- Inline Edit Mode -->
+                <div v-else class="mt-1.5 flex items-center gap-1.5">
+                  <input
+                    ref="editNameInputRef"
+                    v-model="editingNameInput"
+                    type="text"
+                    class="flex-1 bg-dark-900 border border-brand-500 rounded-lg px-2.5 py-1 text-xs text-dark-100 font-bold focus:outline-none focus:ring-1 focus:ring-brand-500/50"
+                    @keydown.enter.prevent="submitRename"
+                    @keydown.esc.prevent="cancelEditingName"
+                  />
+                  <button
+                    @click="submitRename"
+                    class="p-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition-colors"
+                    title="Zapisz nazwę (Enter)"
+                  >
+                    <Check class="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    @click="cancelEditingName"
+                    class="p-1.5 bg-dark-700 hover:bg-dark-600 text-dark-300 rounded-lg transition-colors"
+                    title="Anuluj (Esc)"
+                  >
+                    <X class="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
               <div class="grid grid-cols-2 gap-2 text-xs">
