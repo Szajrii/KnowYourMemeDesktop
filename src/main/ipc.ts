@@ -316,4 +316,45 @@ export function registerIpcHandlers(win: BrowserWindow) {
       return { success: false, message: e.message, duplicates: [] }
     }
   })
+
+  // Backup & Restore Handlers
+  ipcMain.handle('backup:export', async () => {
+    try {
+      const { canceled, filePath } = await dialog.showSaveDialog(win, {
+        title: 'Eksportuj kopię zapasową bazy memów',
+        defaultPath: `memes_backup_${new Date().toISOString().slice(0, 10)}.json`,
+        filters: [{ name: 'JSON Backup (*.json)', extensions: ['json'] }]
+      })
+
+      if (canceled || !filePath) return { success: false }
+
+      const data = db.getData()
+      await fs.promises.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8')
+      return { success: true, filePath }
+    } catch (e: any) {
+      console.error('Failed to export backup:', e)
+      return { success: false, message: e.message }
+    }
+  })
+
+  ipcMain.handle('backup:import', async () => {
+    try {
+      const { canceled, filePaths } = await dialog.showOpenDialog(win, {
+        title: 'Wybierz plik kopii zapasowej do zaimportowania',
+        properties: ['openFile'],
+        filters: [{ name: 'JSON Backup (*.json)', extensions: ['json'] }]
+      })
+
+      if (canceled || filePaths.length === 0) return { success: false }
+
+      const raw = await fs.promises.readFile(filePaths[0], 'utf-8')
+      const parsed = JSON.parse(raw)
+      const updatedData = db.importData(parsed)
+      win.webContents.send('memes:updated', db.getMemes())
+      return { success: true, data: updatedData }
+    } catch (e: any) {
+      console.error('Failed to import backup:', e)
+      return { success: false, message: e.message || 'Nieprawidłowy plik kopii zapasowej' }
+    }
+  })
 }

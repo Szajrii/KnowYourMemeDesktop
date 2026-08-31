@@ -17,7 +17,8 @@ import {
   Search,
   Palette,
   Copy,
-  FileSearch
+  FileSearch,
+  Database
 } from 'lucide-vue-next'
 
 import { AppTheme } from '../../../shared/types'
@@ -26,6 +27,7 @@ const store = useMemeStore()
 const emit = defineEmits<{
   (e: 'openTagManager'): void
   (e: 'openDuplicates'): void
+  (e: 'openBackup'): void
 }>()
 
 const tagSearch = ref('')
@@ -362,11 +364,11 @@ function setFavoritesOnly() {
 
     <!-- Theme & Status Footer -->
     <div class="p-3 border-t border-dark-700/80 bg-dark-800/80 space-y-1.5">
-      <!-- Duplicate Finder & OCR Tools Row -->
-      <div class="grid grid-cols-2 gap-1.5">
+      <!-- Duplicate Finder, OCR & Backup Tools Grid -->
+      <div class="grid grid-cols-3 gap-1.5">
         <button
           @click="emit('openDuplicates')"
-          class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-amber-500/40 text-dark-300 hover:text-amber-300 text-[11px] font-semibold transition-all shadow-sm"
+          class="flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-amber-500/40 text-dark-300 hover:text-amber-300 text-[11px] font-semibold transition-all shadow-sm"
           title="Wykryj identyczne pliki i zwolnij miejsce"
         >
           <Copy class="w-3.5 h-3.5 text-amber-400" />
@@ -376,11 +378,20 @@ function setFavoritesOnly() {
         <button
           @click="store.scanAllOcr"
           :disabled="store.isOcrScanning"
-          class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-brand-500/40 text-dark-300 hover:text-brand-300 text-[11px] font-semibold transition-all shadow-sm disabled:opacity-50"
+          class="flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-brand-500/40 text-dark-300 hover:text-brand-300 text-[11px] font-semibold transition-all shadow-sm disabled:opacity-50"
           title="Rozpoznaj tekst (OCR) dla wszystkich memów bez indeksu"
         >
           <FileSearch class="w-3.5 h-3.5 text-brand-400" :class="store.isOcrScanning ? 'animate-pulse' : ''" />
-          <span>{{ store.isOcrScanning ? 'OCR...' : 'Skan OCR' }}</span>
+          <span>{{ store.isOcrScanning ? 'OCR...' : 'OCR' }}</span>
+        </button>
+
+        <button
+          @click="emit('openBackup')"
+          class="flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-blue-500/40 text-dark-300 hover:text-blue-300 text-[11px] font-semibold transition-all shadow-sm"
+          title="Eksportuj lub importuj kopię zapasową bazy memów"
+        >
+          <Database class="w-3.5 h-3.5 text-blue-400" />
+          <span>Kopia</span>
         </button>
       </div>
 

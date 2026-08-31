@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol, net } from 'electron'
+import { app, BrowserWindow, protocol, net, globalShortcut } from 'electron'
 import path from 'path'
 import fs from 'fs'
 import { fileURLToPath, pathToFileURL } from 'url'
@@ -88,6 +88,22 @@ app.whenReady().then(async () => {
 
   createWindow()
 
+  // Register Global Shortcuts (Ctrl+Shift+M and Alt+Space for Quick Launcher)
+  try {
+    const triggerLauncher = () => {
+      if (mainWindow) {
+        if (mainWindow.isMinimized()) mainWindow.restore()
+        mainWindow.show()
+        mainWindow.focus()
+        mainWindow.webContents.send('launcher:toggle')
+      }
+    }
+    globalShortcut.register('CommandOrControl+Shift+M', triggerLauncher)
+    globalShortcut.register('Alt+Space', triggerLauncher)
+  } catch (err) {
+    console.warn('Could not register global shortcuts:', err)
+  }
+
   // Scan existing configured folders
   if (mainWindow) {
     setTimeout(() => {
@@ -100,6 +116,10 @@ app.whenReady().then(async () => {
       createWindow()
     }
   })
+})
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll()
 })
 
 app.on('window-all-closed', () => {

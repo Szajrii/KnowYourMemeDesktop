@@ -10,6 +10,8 @@ import BatchTagModal from './components/BatchTagModal.vue'
 import PasteMemeModal from './components/PasteMemeModal.vue'
 import DuplicateFinderModal from './components/DuplicateFinderModal.vue'
 import MemeStudioModal from './components/MemeStudioModal.vue'
+import QuickLauncherModal from './components/QuickLauncherModal.vue'
+import BackupModal from './components/BackupModal.vue'
 import Toast from './components/Toast.vue'
 
 const store = useMemeStore()
@@ -17,6 +19,8 @@ const showTagManager = ref(false)
 const showBatchTagModal = ref(false)
 const showPasteModal = ref(false)
 const showDuplicateModal = ref(false)
+const showBackupModal = ref(false)
+const showLauncherModal = ref(false)
 const pastedImageDataUrl = ref('')
 
 async function checkAndHandlePaste(e?: ClipboardEvent) {
@@ -57,8 +61,14 @@ async function checkAndHandlePaste(e?: ClipboardEvent) {
 }
 
 function handleGlobalKeydown(e: KeyboardEvent) {
+  // Ctrl+Shift+M -> toggle quick launcher
+  if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'm') {
+    e.preventDefault()
+    showLauncherModal.value = !showLauncherModal.value
+  }
+
   // Ctrl+F or Cmd+F -> focus search input
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+  if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'f') {
     e.preventDefault()
     const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement
     if (searchInput) {
@@ -87,7 +97,11 @@ function handleGlobalKeydown(e: KeyboardEvent) {
 
   // Escape -> close modals or clear selection
   if (e.key === 'Escape') {
-    if (store.showStudioModal) {
+    if (showLauncherModal.value) {
+      showLauncherModal.value = false
+    } else if (showBackupModal.value) {
+      showBackupModal.value = false
+    } else if (store.showStudioModal) {
       store.closeStudio()
     } else if (showDuplicateModal.value) {
       showDuplicateModal.value = false
@@ -109,6 +123,12 @@ onMounted(() => {
   store.init()
   window.addEventListener('keydown', handleGlobalKeydown)
   window.addEventListener('paste', checkAndHandlePaste as any)
+
+  if (window.electronAPI?.onLauncherToggle) {
+    window.electronAPI.onLauncherToggle(() => {
+      showLauncherModal.value = true
+    })
+  }
 })
 
 onUnmounted(() => {
@@ -123,6 +143,7 @@ onUnmounted(() => {
     <Sidebar
       @open-tag-manager="showTagManager = true"
       @open-duplicates="showDuplicateModal = true"
+      @open-backup="showBackupModal = true"
     />
 
     <!-- Main Content Area -->
@@ -147,6 +168,16 @@ onUnmounted(() => {
     <DuplicateFinderModal
       v-if="showDuplicateModal"
       @close="showDuplicateModal = false"
+    />
+
+    <BackupModal
+      v-if="showBackupModal"
+      @close="showBackupModal = false"
+    />
+
+    <QuickLauncherModal
+      :visible="showLauncherModal"
+      @close="showLauncherModal = false"
     />
 
     <MemeStudioModal

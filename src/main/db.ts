@@ -227,6 +227,23 @@ class Database {
     }
     this.save()
   }
+
+  public importData(newData: Partial<AppDatabaseData>): AppDatabaseData {
+    if (newData.folders) {
+      this.data.folders = newData.folders
+    }
+    if (newData.tags) {
+      this.data.tags = { ...this.data.tags, ...newData.tags }
+    }
+    if (newData.settings) {
+      this.data.settings = { ...this.data.settings, ...newData.settings }
+    }
+    if (newData.memes) {
+      this.data.memes = { ...this.data.memes, ...newData.memes }
+    }
+    this.save()
+    return this.data
+  }
 }
 
 function getRandomTagColor(): string {

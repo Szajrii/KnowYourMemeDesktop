@@ -53,6 +53,11 @@ const api = {
   findDuplicates: (): Promise<{ success: boolean; duplicates: any[]; message?: string }> => 
     ipcRenderer.invoke('duplicates:find'),
 
+  exportBackup: (): Promise<{ success: boolean; filePath?: string; message?: string }> =>
+    ipcRenderer.invoke('backup:export'),
+  importBackup: (): Promise<{ success: boolean; data?: AppDatabaseData; message?: string }> =>
+    ipcRenderer.invoke('backup:import'),
+
   onMemesUpdated: (callback: (memes: MemeItem[]) => void) => {
     const handler = (_event: any, memes: MemeItem[]) => callback(memes)
     ipcRenderer.on('memes:updated', handler)
@@ -67,6 +72,11 @@ const api = {
     const handler = (_event: any, status: any) => callback(status)
     ipcRenderer.on('scanner:status', handler)
     return () => ipcRenderer.removeListener('scanner:status', handler)
+  },
+  onLauncherToggle: (callback: () => void) => {
+    const handler = () => callback()
+    ipcRenderer.on('launcher:toggle', handler)
+    return () => ipcRenderer.removeListener('launcher:toggle', handler)
   }
 }
 
