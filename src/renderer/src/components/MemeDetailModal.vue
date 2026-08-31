@@ -32,6 +32,7 @@ watch(
     if (newMeme) {
       descriptionInput.value = newMeme.description || ''
       newTagInput.value = ''
+      showTagSuggestions.value = false
     }
   },
   { immediate: true }
@@ -155,55 +156,64 @@ onUnmounted(() => {
   <Transition name="fade">
     <div
       v-if="meme"
-      class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-6 select-text"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 sm:p-6 select-text"
       @click.self="closeModal"
     >
       <!-- Modal Container -->
-      <div class="relative w-full max-w-6xl h-[88vh] bg-dark-900 border border-dark-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-col md:flex-row">
+      <div class="relative w-full max-w-7xl h-[90vh] bg-dark-900 border border-dark-700/80 rounded-2xl shadow-2xl overflow-hidden flex flex-row">
         
-        <!-- Navigation Prev / Next overlay buttons -->
-        <button
-          v-if="hasPrev"
-          @click="goToPrev"
-          class="absolute left-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-dark-900/80 hover:bg-dark-800 text-white border border-dark-700 backdrop-blur shadow-xl transition-all hover:scale-110"
-          title="Poprzedni mem (Strzałka w lewo)"
-        >
-          <ChevronLeft class="w-6 h-6" />
-        </button>
-
-        <button
-          v-if="hasNext"
-          @click="goToNext"
-          class="absolute md:right-[360px] right-3 top-1/2 -translate-y-1/2 z-30 p-2.5 rounded-full bg-dark-900/80 hover:bg-dark-800 text-white border border-dark-700 backdrop-blur shadow-xl transition-all hover:scale-110"
-          title="Następny mem (Strzałka w prawo)"
-        >
-          <ChevronRight class="w-6 h-6" />
-        </button>
-
-        <!-- Left Media Preview Area -->
-        <div class="flex-1 bg-black/60 flex items-center justify-center p-4 relative overflow-hidden">
+        <!-- Left Media Preview Area (Takes majority of modal) -->
+        <div class="flex-1 min-w-0 h-full bg-black/80 flex items-center justify-center p-6 relative select-none group overflow-hidden">
+          
+          <!-- Image / GIF Preview -->
           <img
             v-if="meme.type === 'image' || meme.type === 'gif'"
             :src="mediaSrc"
             :alt="meme.name"
-            class="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            class="max-w-full max-h-full object-contain rounded-xl shadow-2xl"
           />
 
+          <!-- Video Player -->
           <video
             v-else-if="meme.type === 'video'"
             :src="mediaSrc"
             controls
             autoplay
             playsinline
-            class="max-w-full max-h-full rounded-lg shadow-2xl"
+            class="max-w-full max-h-full rounded-xl shadow-2xl"
           />
+
+          <!-- Position Counter Pill (Top-Left) -->
+          <div class="absolute top-4 left-4 z-20 flex items-center gap-2 px-3 py-1 rounded-full bg-dark-900/80 border border-dark-700/80 backdrop-blur-md text-xs font-mono text-dark-300 shadow-lg">
+            <span>{{ currentIndex + 1 }} / {{ store.filteredMemes.length }}</span>
+          </div>
+
+          <!-- Navigation Prev / Next Buttons (Inside media viewport) -->
+          <button
+            v-if="hasPrev"
+            @click="goToPrev"
+            class="absolute left-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-dark-900/80 hover:bg-brand-600 text-white border border-dark-700/80 backdrop-blur-md shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            title="Poprzedni mem (Strzałka w lewo)"
+          >
+            <ChevronLeft class="w-6 h-6 stroke-[2.5]" />
+          </button>
+
+          <button
+            v-if="hasNext"
+            @click="goToNext"
+            class="absolute right-4 top-1/2 -translate-y-1/2 z-30 w-12 h-12 rounded-full bg-dark-900/80 hover:bg-brand-600 text-white border border-dark-700/80 backdrop-blur-md shadow-2xl flex items-center justify-center transition-all hover:scale-110 active:scale-95"
+            title="Następny mem (Strzałka w prawo)"
+          >
+            <ChevronRight class="w-6 h-6 stroke-[2.5]" />
+          </button>
         </div>
 
-        <!-- Right Details / Management Sidebar -->
-        <div class="w-full md:w-88 bg-dark-800 border-t md:border-t-0 md:border-l border-dark-700 flex flex-col justify-between overflow-y-auto">
+        <!-- Right Details / Management Sidebar (Fixed Width 380px) -->
+        <div class="w-[380px] shrink-0 h-full bg-dark-800 border-l border-dark-700/80 flex flex-col justify-between overflow-y-auto">
           
-          <!-- Top bar with close & favorite -->
+          <!-- Content Top -->
           <div>
+            <!-- Header bar with quick actions & close button -->
             <div class="p-4 border-b border-dark-700/80 flex items-center justify-between">
               <div class="flex items-center gap-2">
                 <button
@@ -238,11 +248,11 @@ onUnmounted(() => {
               </button>
             </div>
 
-            <!-- Filename & Meta Info -->
+            <!-- Filename & File Info -->
             <div class="p-4 border-b border-dark-700/80 space-y-3">
               <div>
                 <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Nazwa pliku</span>
-                <h3 class="text-sm font-bold text-dark-100 break-all select-all">{{ meme.name }}</h3>
+                <h3 class="text-sm font-bold text-dark-100 break-all select-all mt-0.5">{{ meme.name }}</h3>
               </div>
 
               <div class="grid grid-cols-2 gap-2 text-xs">
@@ -266,7 +276,7 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- Tags Editor -->
+            <!-- Tags Section -->
             <div class="p-4 border-b border-dark-700/80 space-y-3">
               <div class="flex items-center justify-between">
                 <span class="text-[10px] font-bold text-dark-400 uppercase tracking-wider flex items-center gap-1">
@@ -274,7 +284,7 @@ onUnmounted(() => {
                 </span>
               </div>
 
-              <!-- Tag badges list -->
+              <!-- Tag Badges -->
               <div class="flex flex-wrap gap-1.5 min-h-[30px]">
                 <span
                   v-for="tag in meme.tags"
@@ -297,7 +307,7 @@ onUnmounted(() => {
                 </span>
               </div>
 
-              <!-- Add Tag Input with Suggestions -->
+              <!-- Add Tag Input -->
               <div class="relative">
                 <div class="flex items-center gap-2">
                   <input
@@ -321,7 +331,7 @@ onUnmounted(() => {
                 <!-- Suggestions dropdown -->
                 <div
                   v-if="showTagSuggestions && suggestedTags.length > 0"
-                  class="absolute top-full left-0 right-0 mt-1 bg-dark-900 border border-dark-700 rounded-lg shadow-xl z-20 p-1 space-y-0.5 max-h-36 overflow-y-auto"
+                  class="absolute top-full left-0 right-0 mt-1 bg-dark-900 border border-dark-700 rounded-lg shadow-xl z-30 p-1 space-y-0.5 max-h-36 overflow-y-auto"
                 >
                   <div class="px-2 py-1 text-[10px] text-dark-400 font-bold uppercase">Podpowiedzi:</div>
                   <button
@@ -357,7 +367,7 @@ onUnmounted(() => {
           <div class="p-4 border-t border-dark-700/80 bg-dark-900/50 space-y-2">
             <button
               @click="store.copyMemeToClipboard(meme)"
-              class="w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2 transition-all"
+              class="w-full py-2.5 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-500 hover:to-brand-400 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
             >
               <Copy class="w-4 h-4" />
               <span>Kopiuj mema do schowka</span>
