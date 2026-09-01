@@ -21,6 +21,37 @@ if (!gotTheLock) {
 // Embedded 32x32 crisp PNG meme icon fallback (yellow smiley on indigo)
 const EMBEDDED_ICON_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH6AgfDCApW3ZfNwAAAl5JREFUWMPt1z9oU1EcB/DPubknTdo0TZu2SZqmTevfptYqtqJ1cHBwFhwdFBwdBIdSdHBwcBTp4OAgODqIIFRxEBTpoOAXODiIiqg41Kq10qZN8+f3/v7cg4MgiA7GpqXp573d8f28+33u/S3wP/57qHfgWw/Z+4H7/b0FjOlj09M714+fPj08uXlzcnR8fHJ8YmJ1bGRk75o+PjE9MzO3vLw8v7Ky8nJ2dvb5/Pz80tzc3NPJyclr09PTY9c3NgYe+v30/q/AvwzM1o3Z2e3Dw/v7BwefDA4M/tzf3//b39/f2tvbe7K3v7+9t7e3t7e/v76+vv5kdXX12crKysPV1dUnW1tbW+s3by7U9fHB+wrcy8Bs3Zqd3ds/OPj6aPvG7eHh4ff9A4Pnh4aGftjf3//f3t7evp2dnRdr6+tbq+vr6y/W1taeLK6t/ZiZmXm4urq6fHR8/OD3BTY3Zycmnp05c/7e0NDQ790bN36eOHnq3uDQ0Jv9A4O7e3t7W2u3b/84Oj6+ubq6enfl/Pmnq5OTv1fPnfu6urq6c3R8fP+eAic3Nzc33t+8eXN4aOjt3uDg21OnT7/b29v7vLKy8uT4+Pj68vLyk9XV1bfrN278PH327O/lCxe+LC8v7+wdHNxzYGlpaWltbe3lysrKg9XV1T9ra2sfVldX779cXX25uLz8eHFp6f7U7OzU7OzsvbmFhQcLc3Pv5+fnd+/eufPQ9evXT1/9B+A/xWwBqL/dAv4B00t7A8iI0EAAAAAASUVORK5CYII='
 
+function ensureWindowsShortcut() {
+  if (process.platform !== 'win32' || process.env.VITE_DEV_SERVER_URL) return
+  try {
+    const appData = process.env.APPDATA
+    if (!appData) return
+    const shortcutPath = path.join(appData, 'Microsoft/Windows/Start Menu/Programs/Know Your Meme Desktop.lnk')
+    const targetExe = process.execPath
+    const iconIco = path.join(process.resourcesPath, 'icon.ico')
+    const iconTarget = fs.existsSync(iconIco) ? iconIco : targetExe
+
+    if (!fs.existsSync(shortcutPath)) {
+      const vbs = `
+Set oWS = WScript.CreateObject("WScript.Shell")
+Set oLink = oWS.CreateShortcut("${shortcutPath.replace(/\\/g, '\\\\')}")
+oLink.TargetPath = "${targetExe.replace(/\\/g, '\\\\')}"
+oLink.WorkingDirectory = "${path.dirname(targetExe).replace(/\\/g, '\\\\')}"
+oLink.IconLocation = "${iconTarget.replace(/\\/g, '\\\\')},0"
+oLink.Description = "Know Your Meme Desktop"
+oLink.Save
+`
+      const tempVbs = path.join(app.getPath('temp'), 'kym_shortcut.vbs')
+      fs.writeFileSync(tempVbs, vbs, 'utf8')
+      import('child_process').then(cp => {
+        cp.exec(`cscript //nologo "${tempVbs}"`, () => {
+          if (fs.existsSync(tempVbs)) fs.unlinkSync(tempVbs)
+        })
+      })
+    }
+  } catch (_) {}
+}
+
 function getAppIcon(): NativeImage {
   const possiblePaths = [
     path.join(__dirname, '../../resources/icon.ico'),
@@ -171,6 +202,7 @@ function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  ensureWindowsShortcut()
   // Handle custom media:// protocol to serve local images/videos
   protocol.handle('media', (request) => {
     try {
