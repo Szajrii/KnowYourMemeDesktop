@@ -12,9 +12,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview",
-    "build:dir": "npm run build && electron-builder --dir",
-    "build:win": "npm run build && electron-builder --win",
-    "build:portable": "npm run build && electron-builder --win portable"
+    "build:dir": "npm run build && electron-builder --dir && node scripts/set-icon.cjs",
+    "build:win": "npm run build && electron-builder --win && node scripts/set-icon.cjs",
+    "build:portable": "npm run build && electron-builder --win portable && node scripts/set-icon.cjs",
+    "set-icon": "node scripts/set-icon.cjs"
   },
   "dependencies": {
     "chokidar": "^4.0.3",
@@ -33,6 +34,7 @@
     "happy-dom": "^20.12.0",
     "png-to-ico": "^3.0.2",
     "postcss": "^8.5.2",
+    "rcedit": "^5.0.2",
     "sharp": "^0.35.4",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",

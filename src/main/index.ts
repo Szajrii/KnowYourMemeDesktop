@@ -8,6 +8,9 @@ import { mediaScanner } from './scanner'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
+// Set Windows AppUserModelId so Taskbar displays the correct icon
+app.setAppUserModelId('com.knowyourmeme.desktop')
+
 // Single Instance Lock - prevent running multiple instances
 const gotTheLock = app.requestSingleInstanceLock()
 
@@ -20,10 +23,15 @@ const EMBEDDED_ICON_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABm
 
 function getAppIcon(): NativeImage {
   const possiblePaths = [
+    path.join(__dirname, '../../resources/icon.ico'),
     path.join(__dirname, '../../resources/icon.png'),
+    path.join(__dirname, '../resources/icon.ico'),
     path.join(__dirname, '../resources/icon.png'),
+    path.join(process.resourcesPath, 'resources/icon.ico'),
     path.join(process.resourcesPath, 'resources/icon.png'),
+    path.join(process.resourcesPath, 'icon.ico'),
     path.join(process.resourcesPath, 'icon.png'),
+    path.join(app.getAppPath(), 'resources/icon.ico'),
     path.join(app.getAppPath(), 'resources/icon.png')
   ]
   for (const p of possiblePaths) {
