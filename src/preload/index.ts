@@ -52,6 +52,10 @@ const api = {
     ipcRenderer.invoke('ocr:scanAll'),
   findDuplicates: (): Promise<{ success: boolean; duplicates: any[]; message?: string }> => 
     ipcRenderer.invoke('duplicates:find'),
+  scanAllSimilarity: (): Promise<{ success: boolean; updatedCount: number; message?: string }> =>
+    ipcRenderer.invoke('similarity:scanAll'),
+  computeSimilarityHash: (target: string): Promise<{ success: boolean; hash?: string; message?: string }> =>
+    ipcRenderer.invoke('similarity:computeHash', target),
 
   exportBackup: (): Promise<{ success: boolean; filePath?: string; message?: string }> =>
     ipcRenderer.invoke('backup:export'),
@@ -67,6 +71,11 @@ const api = {
     const handler = (_event: any, data: any) => callback(data)
     ipcRenderer.on('ocr:progress', handler)
     return () => ipcRenderer.removeListener('ocr:progress', handler)
+  },
+  onSimilarityProgress: (callback: (data: { current: number; total: number; updatedCount: number }) => void) => {
+    const handler = (_event: any, data: any) => callback(data)
+    ipcRenderer.on('similarity:progress', handler)
+    return () => ipcRenderer.removeListener('similarity:progress', handler)
   },
   onScannerStatus: (callback: (status: { folder: string; scanning: boolean; count?: number }) => void) => {
     const handler = (_event: any, status: any) => callback(status)

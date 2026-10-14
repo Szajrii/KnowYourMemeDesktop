@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
-import { MemeItem, FolderConfig, FilterOptions, TagInfo, AppDatabaseData, AppTheme } from '../../../shared/types'
+import { MemeItem, FolderConfig, FilterOptions, TagInfo, AppDatabaseData, AppTheme, SimilarityMatch, SimilarCluster } from '../../../shared/types'
+import { findSimilarMemes, clusterMemesBySimilarity, computeCanvasDHash } from '../utils/phash'
+import { getMediaUrl } from '../utils/media'
 
 export const useMemeStore = defineStore('meme', {
   state: () => ({
@@ -28,6 +30,8 @@ export const useMemeStore = defineStore('meme', {
     scannerStatusText: '',
     isOcrScanning: false,
     ocrProgressText: '',
+    isSimilarityScanning: false,
+    similarityProgressText: '',
     isFindingDuplicates: false,
     duplicateGroups: [] as any[],
     studioMeme: null as MemeItem | null,
@@ -209,6 +213,12 @@ export const useMemeStore = defineStore('meme', {
             this.ocrProgressText = `OCR (${prog.current}/${prog.total}): ${prog.file}`
           })
         }
+
+        if (window.electronAPI.onSimilarityProgress) {
+          window.electronAPI.onSimilarityProgress((prog) => {
+            this.similarityProgressText = `Hashe wizualne (${prog.current}/${prog.total})`
+          })
+        }
       } catch (err) {
         console.error('Failed to initialize meme store:', err)
       }
@@ -272,6 +282,109 @@ export const useMemeStore = defineStore('meme', {
         this.showToast(`Błąd: ${e.message}`, 'error')
         return []
       }
+    },
+
+    async computeMemeHash(meme: MemeItem): Promise<string | null> {
+      if (meme.phash && meme.phash.length === 16) return meme.phash
+      try {
+        let hash: string | null = null
+        if (window.electronAPI?.computeSimilarityHash) {
+          const res = await window.electronAPI.computeSimilarityHash(meme.path)
+          if (res.success && res.hash) hash = res.hash
+        }
+        if (!hash) {
+          // Client-side Canvas fallback (universal for standalone and .par plugin)
+          const url = getMediaUrl(meme.path)
+          hash = await computeCanvasDHash(url)
+        }
+        if (hash) {
+          meme.phash = hash
+          if (window.electronAPI) {
+            await window.electronAPI.updateMeme(meme.path, { phash: hash })
+          }
+        }
+        return hash
+      } catch {
+        return null
+      }
+    },
+
+    async scanAllSimilarity(): Promise<number> {
+      if (this.isSimilarityScanning) return 0
+      this.isSimilarityScanning = true
+      try {
+        this.showToast('Rozpoczęto indeksowanie wizualne memów...', 'info')
+        if (window.electronAPI?.scanAllSimilarity) {
+          const res = await window.electronAPI.scanAllSimilarity()
+          this.isSimilarityScanning = false
+          this.similarityProgressText = ''
+          if (res.success) {
+            this.showToast(`Zindeksowano ${res.updatedCount} szablonów wizualnych`, 'success')
+            return res.updatedCount
+          }
+          return 0
+        } else {
+          // Plugin mode client-side scanning
+          let count = 0
+          for (const m of this.memes) {
+            if (!m.phash && m.type !== 'audio') {
+              const h = await this.computeMemeHash(m)
+              if (h) count++
+            }
+          }
+          this.isSimilarityScanning = false
+          this.similarityProgressText = ''
+          this.showToast(`Zindeksowano ${count} szablonów wizualnych`, 'success')
+          return count
+        }
+      } catch (e: any) {
+        this.isSimilarityScanning = false
+        this.similarityProgressText = ''
+        this.showToast(`Błąd indeksowania: ${e.message}`, 'error')
+        return 0
+      }
+    },
+
+    findSimilarTo(target: MemeItem | string, minSimilarity = 80): SimilarityMatch[] {
+      const hash = typeof target === 'string' ? target : target.phash
+      const excludePath = typeof target === 'string' ? undefined : target.path
+      if (!hash) return []
+      return findSimilarMemes(hash, this.memes, minSimilarity, excludePath)
+    },
+
+    getSimilarClusters(minSimilarity = 80): SimilarCluster[] {
+      return clusterMemesBySimilarity(this.memes, minSimilarity)
+    },
+
+    async syncClusterTags(cluster: SimilarCluster, tagsToApply?: string[]) {
+      const tags = tagsToApply && tagsToApply.length > 0 ? tagsToApply : cluster.suggestedTags
+      if (tags.length === 0) {
+        this.showToast('Brak tagów do zsynchronizowania w tej grupie', 'info')
+        return
+      }
+
+      const pathsToUpdate = cluster.memes
+        .filter(m => !m.tags || m.tags.length === 0 || !tags.every(t => m.tags.includes(t)))
+        .map(m => m.path)
+
+      if (pathsToUpdate.length === 0) {
+        this.showToast('Wszystkie memy w tej grupie mają już komplet tagów!', 'info')
+        return
+      }
+
+      await this.batchAddTags(tags, pathsToUpdate)
+
+      // Also update meme objects directly so any referencing view updates immediately
+      for (const m of cluster.memes) {
+        if (pathsToUpdate.includes(m.path)) {
+          const s = new Set(m.tags || [])
+          for (const t of tags) s.add(t)
+          m.tags = Array.from(s)
+        }
+      }
+      cluster.untaggedCount = cluster.memes.filter(m => !m.tags || m.tags.length === 0).length
+
+      this.showToast(`Przypisano tagi [${tags.join(', ')}] do ${pathsToUpdate.length} memów!`, 'success')
     },
 
     openStudio(meme?: MemeItem | null) {
@@ -420,13 +533,27 @@ export const useMemeStore = defineStore('meme', {
       }
     },
 
-    async batchAddTags(tags: string[]) {
-      if (!window.electronAPI || this.selectedPaths.size === 0) return
+    async batchAddTags(tags: string[], specificPaths?: string[]) {
+      const paths = specificPaths ? specificPaths.map(p => String(p)) : Array.from(this.selectedPaths).map(p => String(p))
+      if (paths.length === 0) return
+      const cleanTags = tags.map(t => String(t).trim()).filter(Boolean)
+      if (cleanTags.length === 0) return
+
       try {
-        const paths = Array.from(this.selectedPaths).map(p => String(p))
-        const cleanTags = tags.map(t => String(t).trim()).filter(Boolean)
-        const updatedData = await window.electronAPI.batchUpdateTags(paths, cleanTags, [])
-        this.setDbData(updatedData)
+        if (window.electronAPI) {
+          const updatedData = await window.electronAPI.batchUpdateTags(paths, cleanTags, [])
+          this.setDbData(updatedData)
+        } else {
+          // Plugin/in-memory fallback
+          for (const path of paths) {
+            const m = this.memes.find(x => x.path === path)
+            if (m) {
+              const current = new Set(m.tags)
+              for (const t of cleanTags) current.add(t)
+              m.tags = Array.from(current)
+            }
+          }
+        }
         this.showToast(`Dodano tagi do ${paths.length} memów`, 'success')
       } catch (e: any) {
         this.showToast(`Błąd: ${e.message}`, 'error')

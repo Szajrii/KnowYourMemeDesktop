@@ -114,6 +114,7 @@ export class MediaScanner {
                 isFavorite: existing?.isFavorite || false,
                 description: existing?.description || '',
                 rating: existing?.rating || 0,
+                phash: existing?.phash,
                 folder: rootFolder
               }
 

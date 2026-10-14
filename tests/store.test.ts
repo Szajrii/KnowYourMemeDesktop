@@ -471,4 +471,79 @@ describe('Meme Pinia Store', () => {
     expect(store.filteredMemes.length).toBe(1)
     expect(store.filteredMemes[0].name).toBe('bruh.mp3')
   })
+
+  it('should find visually similar memes and cluster them', async () => {
+    const store = useMemeStore()
+    const similarMeme1: MemeItem = {
+      id: 's1',
+      path: 'C:\\Memes\\drake1.png',
+      name: 'drake1.png',
+      extension: '.png',
+      type: 'image',
+      size: 100,
+      createdAt: 100,
+      modifiedAt: 100,
+      tags: ['drake', 'yes-no'],
+      isFavorite: false,
+      folder: 'C:\\Memes',
+      phash: '1111222233334444'
+    }
+    const similarMeme2: MemeItem = {
+      id: 's2',
+      path: 'C:\\Memes\\drake2.png',
+      name: 'drake2.png',
+      extension: '.png',
+      type: 'image',
+      size: 100,
+      createdAt: 100,
+      modifiedAt: 100,
+      tags: [],
+      isFavorite: false,
+      folder: 'C:\\Memes',
+      phash: '1111222233334445' // 1 bit diff
+    }
+    const differentMeme: MemeItem = {
+      id: 's3',
+      path: 'C:\\Memes\\diff.png',
+      name: 'diff.png',
+      extension: '.png',
+      type: 'image',
+      size: 100,
+      createdAt: 100,
+      modifiedAt: 100,
+      tags: ['other'],
+      isFavorite: false,
+      folder: 'C:\\Memes',
+      phash: 'ffffffffffffffff'
+    }
+
+    store.memes = [similarMeme1, similarMeme2, differentMeme]
+
+    // Find similar
+    const matches = store.findSimilarTo(similarMeme1, 80)
+    expect(matches.length).toBe(1)
+    expect(matches[0].meme.path).toBe(similarMeme2.path)
+    expect(matches[0].similarity).toBeGreaterThan(95)
+
+    // Clusters
+    const clusters = store.getSimilarClusters(80)
+    expect(clusters.length).toBe(1)
+    expect(clusters[0].memes.length).toBe(2)
+    expect(clusters[0].untaggedCount).toBe(1)
+    expect(clusters[0].suggestedTags).toContain('drake')
+
+    // Mock batchAddTags
+    ;(window as any).electronAPI = {
+      batchUpdateTags: async () => ({
+        memes: {
+          [similarMeme1.path]: similarMeme1,
+          [similarMeme2.path]: { ...similarMeme2, tags: ['drake', 'yes-no'] }
+        },
+        tags: { drake: { color: '#6366f1' }, 'yes-no': { color: '#6366f1' } }
+      })
+    }
+
+    await store.syncClusterTags(clusters[0])
+    expect(similarMeme2.tags).toContain('drake')
+  })
 })

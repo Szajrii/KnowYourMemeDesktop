@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useMemeStore } from '../stores/memeStore'
-import { X, Folder, Tag as TagIcon, Check, ClipboardPaste } from 'lucide-vue-next'
+import { X, Folder, Tag as TagIcon, Check, ClipboardPaste, Sparkles, AlertCircle } from 'lucide-vue-next'
+import { computeCanvasDHash } from '../utils/phash'
+import { getMediaUrl } from '../utils/media'
+import { SimilarityMatch } from '../../../shared/types'
 
 const props = defineProps<{
   visible: boolean
@@ -21,6 +24,42 @@ const tags = ref<string[]>([])
 const tagInput = ref('')
 const description = ref('')
 const isSaving = ref(false)
+const similarMatches = ref<SimilarityMatch[]>([])
+const isCheckingSimilarity = ref(false)
+
+const suggestedTags = computed(() => {
+  const set = new Set<string>()
+  for (const match of similarMatches.value) {
+    for (const t of match.meme.tags || []) {
+      const norm = t.toLowerCase().trim()
+      if (norm && !tags.value.includes(norm)) {
+        set.add(norm)
+      }
+    }
+  }
+  return Array.from(set)
+})
+
+async function checkSimilarity(dataUrl: string) {
+  if (!dataUrl) {
+    similarMatches.value = []
+    return
+  }
+  isCheckingSimilarity.value = true
+  try {
+    const hash = await computeCanvasDHash(dataUrl)
+    if (hash) {
+      similarMatches.value = store.findSimilarTo(hash, 80)
+    } else {
+      similarMatches.value = []
+    }
+  } catch (err) {
+    console.error('Failed to compute similarity for pasted image:', err)
+    similarMatches.value = []
+  } finally {
+    isCheckingSimilarity.value = false
+  }
+}
 
 watch(
   () => props.visible,
@@ -33,10 +72,24 @@ watch(
       tags.value = []
       tagInput.value = ''
       description.value = ''
+      similarMatches.value = []
+      if (props.imageDataUrl) {
+        checkSimilarity(props.imageDataUrl)
+      }
     }
   },
   { immediate: true }
 )
+
+function addSuggestedTag(tag: string) {
+  addTag(tag)
+}
+
+function addAllSuggestedTags() {
+  for (const t of suggestedTags.value) {
+    addTag(t)
+  }
+}
 
 function addTag(tag: string) {
   const norm = tag.toLowerCase().trim()
@@ -113,6 +166,64 @@ async function saveMeme() {
                 alt="Pasted meme preview"
                 class="max-h-52 max-w-full object-contain rounded-lg shadow-md"
               />
+            </div>
+
+            <!-- Similar Memes Recognition Banner -->
+            <div
+              v-if="similarMatches.length > 0"
+              class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2.5 animate-in fade-in duration-200"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2 text-xs font-semibold text-amber-300">
+                  <Sparkles class="w-4 h-4 text-amber-400" />
+                  <span>Rozpoznano szablon w bibliotece! ({{ similarMatches.length }} podobnych)</span>
+                </div>
+                <span class="text-[11px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-bold">
+                  {{ similarMatches[0].similarity }}% zgodności
+                </span>
+              </div>
+
+              <!-- Thumbnails of similar items -->
+              <div class="flex items-center gap-2 overflow-x-auto py-1 scrollbar-thin">
+                <div
+                  v-for="match in similarMatches.slice(0, 5)"
+                  :key="match.meme.path"
+                  class="relative group shrink-0 w-14 h-14 rounded-lg overflow-hidden border border-amber-500/30 bg-dark-900"
+                  :title="`${match.meme.name} (${match.similarity}% podobieństwa)`"
+                >
+                  <img
+                    :src="getMediaUrl(match.meme.path)"
+                    class="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <span class="absolute bottom-0 inset-x-0 bg-black/75 text-[9px] text-amber-300 text-center font-mono py-0.5">
+                    {{ match.similarity }}%
+                  </span>
+                </div>
+              </div>
+
+              <!-- Suggested Tags -->
+              <div v-if="suggestedTags.length > 0" class="pt-1 border-t border-amber-500/20 flex flex-wrap items-center gap-1.5">
+                <span class="text-[11px] text-amber-200/80 font-medium">Sugerowane tagi:</span>
+                <button
+                  v-for="stag in suggestedTags"
+                  :key="stag"
+                  type="button"
+                  @click="addSuggestedTag(stag)"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 transition-colors cursor-pointer"
+                  title="Kliknij, aby dodać ten tag"
+                >
+                  <span>+ #{{ stag }}</span>
+                </button>
+                <button
+                  v-if="suggestedTags.length > 1"
+                  type="button"
+                  @click="addAllSuggestedTags"
+                  class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-dark-950 hover:bg-amber-400 transition-colors ml-auto shadow-sm"
+                >
+                  Dodaj wszystkie (+{{ suggestedTags.length }})
+                </button>
+              </div>
             </div>
 
             <!-- Target Folder Selection -->

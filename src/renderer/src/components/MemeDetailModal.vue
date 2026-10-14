@@ -23,8 +23,10 @@ import {
   Flame,
   FileSearch,
   Sparkles,
-  Music
+  Music,
+  AlertCircle
 } from 'lucide-vue-next'
+import { SimilarityMatch } from '../../../shared/types'
 
 const store = useMemeStore()
 const newTagInput = ref('')
@@ -37,6 +39,37 @@ const editNameInputRef = ref<HTMLInputElement | null>(null)
 
 const meme = computed(() => store.selectedMeme)
 
+const similarMatches = computed<SimilarityMatch[]>(() => {
+  if (!meme.value || !meme.value.phash) return []
+  return store.findSimilarTo(meme.value, 80)
+})
+
+const suggestedTagsFromSimilar = computed(() => {
+  if (!meme.value) return []
+  const currentTags = new Set((meme.value.tags || []).map(t => t.toLowerCase().trim()))
+  const set = new Set<string>()
+  for (const match of similarMatches.value) {
+    for (const t of match.meme.tags || []) {
+      const norm = t.toLowerCase().trim()
+      if (norm && !currentTags.has(norm)) {
+        set.add(norm)
+      }
+    }
+  }
+  return Array.from(set)
+})
+
+function selectSimilarMeme(similar: any) {
+  store.selectedMeme = similar
+}
+
+async function addAllSuggestedTags() {
+  if (!meme.value || suggestedTagsFromSimilar.value.length === 0) return
+  const newTags = [...meme.value.tags, ...suggestedTagsFromSimilar.value]
+  await store.updateMemeTags(meme.value, newTags)
+  store.showToast(`Dodano ${suggestedTagsFromSimilar.value.length} sugerowanych tagów!`, 'success')
+}
+
 watch(
   () => meme.value,
   (newMeme) => {
@@ -46,6 +79,9 @@ watch(
       showTagSuggestions.value = false
       isEditingName.value = false
       editingNameInput.value = ''
+      if (!newMeme.phash && newMeme.type !== 'audio') {
+        store.computeMemeHash(newMeme)
+      }
     }
   },
   { immediate: true }
@@ -421,6 +457,41 @@ onUnmounted(() => {
                 </span>
               </div>
 
+              <!-- Warning if untagged but similar memes have tags -->
+              <div
+                v-if="similarMatches.length > 0 && meme.tags.length === 0"
+                class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2 animate-in fade-in duration-200"
+              >
+                <div class="flex items-start gap-2 text-xs">
+                  <AlertCircle class="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span class="font-bold text-amber-300">Brak tagów – wykryto podobne szablony!</span>
+                    <p class="text-[11px] text-amber-200/80">W bibliotece znaleziono {{ similarMatches.length }} podobnych memów z gotowymi tagami.</p>
+                  </div>
+                </div>
+                <div v-if="suggestedTagsFromSimilar.length > 0" class="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span class="text-[10px] text-amber-300 font-medium">Sugerowane:</span>
+                  <button
+                    v-for="st in suggestedTagsFromSimilar"
+                    :key="st"
+                    type="button"
+                    @click="addTag(st)"
+                    class="px-2 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-200 text-[11px] font-medium transition-colors"
+                    title="Dodaj ten tag"
+                  >
+                    + #{{ st }}
+                  </button>
+                  <button
+                    v-if="suggestedTagsFromSimilar.length > 1"
+                    type="button"
+                    @click="addAllSuggestedTags"
+                    class="px-2 py-0.5 rounded-full bg-amber-500 text-dark-950 font-bold hover:bg-amber-400 text-[11px] ml-auto shadow-sm transition-colors"
+                  >
+                    Dodaj wszystkie (+{{ suggestedTagsFromSimilar.length }})
+                  </button>
+                </div>
+              </div>
+
               <!-- Tag Badges -->
               <div class="flex flex-wrap gap-1.5 min-h-[30px]">
                 <span
@@ -520,6 +591,60 @@ onUnmounted(() => {
               </div>
               <div v-else class="text-[11px] text-dark-500 italic">
                 {{ meme.type === 'image' ? 'Tekst nie został jeszcze odczytany. Kliknij "Odczytaj tekst", aby wyszukiwać mema po jego treści.' : 'OCR jest dostępny tylko dla plików graficznych.' }}
+              </div>
+            </div>
+
+            <!-- Similar Templates Section -->
+            <div v-if="similarMatches.length > 0" class="p-4 border-b border-dark-700/80 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles class="w-3.5 h-3.5 text-amber-400" />
+                  <span>Podobne szablony ({{ similarMatches.length }})</span>
+                </span>
+                <span class="text-[11px] text-amber-400/90 font-mono font-medium">
+                  do {{ similarMatches[0].similarity }}% zgodności
+                </span>
+              </div>
+
+              <div class="grid grid-cols-3 gap-2">
+                <div
+                  v-for="match in similarMatches.slice(0, 6)"
+                  :key="match.meme.path"
+                  @click="selectSimilarMeme(match.meme)"
+                  class="group relative rounded-xl overflow-hidden border border-dark-700 hover:border-amber-500/60 bg-dark-900 cursor-pointer transition-all aspect-square shadow-sm"
+                  :title="`Kliknij, aby otworzyć: ${match.meme.name} (${match.similarity}% podobieństwa)`"
+                >
+                  <img
+                    :src="getMediaUrl(match.meme.path)"
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                    loading="lazy"
+                  />
+                  <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-1.5 flex items-center justify-between text-[10px]">
+                    <span class="text-amber-300 font-mono font-bold">{{ match.similarity }}%</span>
+                    <span class="text-dark-300 truncate max-w-[60%]">{{ match.meme.tags.length }} tagów</span>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="suggestedTagsFromSimilar.length > 0 && meme.tags.length > 0" class="pt-1 flex flex-wrap items-center gap-1.5">
+                <span class="text-[10px] text-dark-400 font-medium">Brakujące z podobnych:</span>
+                <button
+                  v-for="st in suggestedTagsFromSimilar"
+                  :key="st"
+                  type="button"
+                  @click="addTag(st)"
+                  class="px-2 py-0.5 rounded-full bg-dark-800 hover:bg-dark-700 border border-dark-600 text-dark-200 text-[11px] transition-colors"
+                >
+                  + #{{ st }}
+                </button>
+                <button
+                  v-if="suggestedTagsFromSimilar.length > 1"
+                  type="button"
+                  @click="addAllSuggestedTags"
+                  class="px-2 py-0.5 rounded-full bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/30 text-amber-300 text-[11px] font-semibold ml-auto transition-colors"
+                >
+                  Dodaj wszystkie (+{{ suggestedTagsFromSimilar.length }})
+                </button>
               </div>
             </div>
 

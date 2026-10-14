@@ -15,10 +15,25 @@ export interface MemeItem {
   rating?: number // 1-5 stars
   usedCount?: number // times copied or shared
   ocrText?: string // text extracted via OCR
+  phash?: string // 64-bit perceptual difference hash
   width?: number
   height?: number
   duration?: number
   folder: string
+}
+
+export interface SimilarityMatch {
+  meme: MemeItem
+  similarity: number // 0-100%
+  distance: number // 0-64
+}
+
+export interface SimilarCluster {
+  id: string
+  leadMeme: MemeItem
+  memes: MemeItem[]
+  suggestedTags: string[]
+  untaggedCount: number
 }
 
 export interface TagInfo {

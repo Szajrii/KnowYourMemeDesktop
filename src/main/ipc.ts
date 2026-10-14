@@ -6,6 +6,7 @@ import { db } from './db'
 import { mediaScanner } from './scanner'
 import { ocrService } from './ocr'
 import { findDuplicates } from './duplicates'
+import { computeBufferDHash, computeFileDHash, scanAllMissingHashes } from './similarity'
 import { FolderConfig, MemeItem, AppDatabaseData } from '../shared/types'
 
 export function registerIpcHandlers(win: BrowserWindow) {
@@ -270,6 +271,7 @@ function createHDROPBuffer(filePath: string): Buffer {
       await fs.promises.writeFile(filePath, buffer)
       const stats = await fs.promises.stat(filePath)
       const ext = path.extname(filePath).toLowerCase()
+      const phash = await computeBufferDHash(buffer)
 
       const newMeme: MemeItem = {
         id: Buffer.from(filePath).toString('base64').replace(/[/+=]/g, '_'),
@@ -284,6 +286,7 @@ function createHDROPBuffer(filePath: string): Buffer {
         isFavorite: false,
         description: description || '',
         folder: folderPath,
+        phash: phash || undefined,
         usedCount: 0
       }
 
@@ -378,6 +381,33 @@ function createHDROPBuffer(filePath: string): Buffer {
     } catch (e: any) {
       console.error('Failed to import backup:', e)
       return { success: false, message: e.message || 'Nieprawidłowy plik kopii zapasowej' }
+    }
+  })
+
+  // Similarity & Perceptual Hashing Handlers
+  ipcMain.handle('similarity:scanAll', async () => {
+    try {
+      const res = await scanAllMissingHashes(win)
+      return { success: true, updatedCount: res.updatedCount }
+    } catch (e: any) {
+      console.error('Failed to scan similarity hashes:', e)
+      return { success: false, message: e.message, updatedCount: 0 }
+    }
+  })
+
+  ipcMain.handle('similarity:computeHash', async (_event, target: string) => {
+    try {
+      if (target.startsWith('data:image')) {
+        const base64Clean = target.replace(/^data:image\/\w+;base64,/, '')
+        const buf = Buffer.from(base64Clean, 'base64')
+        const hash = await computeBufferDHash(buf)
+        return { success: !!hash, hash }
+      } else {
+        const hash = await computeFileDHash(target)
+        return { success: !!hash, hash }
+      }
+    } catch (e: any) {
+      return { success: false, message: e.message }
     }
   })
 }

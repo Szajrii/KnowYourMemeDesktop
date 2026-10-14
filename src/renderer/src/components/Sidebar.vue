@@ -384,11 +384,11 @@ function setFavoritesOnly() {
       <div class="grid grid-cols-3 gap-1.5">
         <button
           @click="emit('openDuplicates')"
-          class="flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-amber-500/40 text-dark-300 hover:text-amber-300 text-[11px] font-semibold transition-all shadow-sm"
-          title="Wykryj identyczne pliki i zwolnij miejsce"
+          class="flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-xl bg-dark-900/80 border border-dark-700 hover:border-amber-500/40 text-dark-300 hover:text-amber-300 text-[11px] font-semibold transition-all shadow-sm cursor-pointer"
+          title="Wykryj podobne szablony, duplikaty i ujednolicaj tagi"
         >
-          <Copy class="w-3.5 h-3.5 text-amber-400" />
-          <span>Duplikaty</span>
+          <Sparkles class="w-3.5 h-3.5 text-amber-400" />
+          <span>Szablony</span>
         </button>
 
         <button
