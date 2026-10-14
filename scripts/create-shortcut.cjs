@@ -8,8 +8,22 @@ const iconIco = path.resolve(__dirname, '../resources/icon.ico')
 const appData = process.env.APPDATA
 const userProfile = process.env.USERPROFILE
 
-const startMenu = path.join(appData, 'Microsoft/Windows/Start Menu/Programs/Know Your Meme Desktop.lnk')
-const desktop = path.join(userProfile, 'Desktop/Know Your Meme Desktop.lnk')
+const possibleDesktopDirs = [
+  path.join(userProfile, 'OneDrive/Pulpit'),
+  path.join(userProfile, 'OneDrive/Desktop'),
+  path.join(userProfile, 'Desktop'),
+  path.join(userProfile, 'Pulpit')
+]
+
+const targets = [
+  path.join(appData, 'Microsoft/Windows/Start Menu/Programs/Know Your Meme Desktop.lnk')
+]
+
+for (const dir of possibleDesktopDirs) {
+  if (fs.existsSync(dir)) {
+    targets.push(path.join(dir, 'Know Your Meme Desktop.lnk'))
+  }
+}
 
 function createShortcut(destPath) {
   const vbs = `
@@ -33,8 +47,9 @@ oLink.Save
 }
 
 if (fs.existsSync(targetExe)) {
-  createShortcut(startMenu)
-  createShortcut(desktop)
+  for (const t of targets) {
+    createShortcut(t)
+  }
 } else {
   console.warn('Target exe does not exist yet:', targetExe)
 }

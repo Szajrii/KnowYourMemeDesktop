@@ -1,0 +1,22 @@
+{
+  "$schema": "workbench-plugin-v1",
+  "id": "meme-manager",
+  "name": "Meme Manager",
+  "version": "1.0.0",
+  "description": "Zarządzanie, tagowanie i katalogowanie Twojej kolekcji memów",
+  "author": "Michał",
+  "icon": "resources/icon.png",
+  "entry": "dist/index.html",
+  "permissions": [
+    "filesystem:read",
+    "filesystem:write",
+    "dialog:open",
+    "dialog:save",
+    "clipboard",
+    "notifications"
+  ],
+  "defaultSize": {
+    "minWidth": 900,
+    "minHeight": 650
+  }
+}
