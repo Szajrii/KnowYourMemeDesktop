@@ -31,11 +31,11 @@ function toggleSelectAll() {
 </script>
 
 <template>
-  <header class="bg-dark-800/90 backdrop-blur-md border-b border-dark-700/80 px-6 py-3.5 flex flex-col gap-3 shrink-0">
+  <header class="bg-dark-800/90 backdrop-blur-md border-b border-dark-700/80 px-4 sm:px-6 py-3 flex flex-col gap-3 shrink-0">
     <!-- Top Action Bar -->
-    <div class="flex items-center justify-between gap-4">
+    <div class="flex items-center justify-between gap-3 flex-wrap lg:flex-nowrap">
       <!-- Search Input -->
-      <div class="relative flex-1 max-w-xl">
+      <div class="relative flex-1 min-w-[180px] max-w-xl">
         <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-dark-400" />
         <input
           v-model="store.filter.searchQuery"
@@ -53,7 +53,7 @@ function toggleSelectAll() {
       </div>
 
       <!-- Quick Action Controls -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2 shrink-0 flex-wrap">
         <!-- Stats Dashboard Button -->
         <button
           @click="emit('openStats')"
@@ -61,7 +61,7 @@ function toggleSelectAll() {
           title="Zobacz statystyki i podsumowanie swojej kolekcji"
         >
           <BarChart3 class="w-4 h-4 text-amber-400" />
-          <span>Statystyki</span>
+          <span class="hidden xl:inline">Statystyki</span>
         </button>
 
         <!-- Meme Generator / Studio Button -->
@@ -71,7 +71,7 @@ function toggleSelectAll() {
           title="Stwórz nowego mema lub edytuj w Meme Studio"
         >
           <Sparkles class="w-4 h-4 text-purple-400" />
-          <span>Generator</span>
+          <span class="hidden lg:inline">Generator</span>
         </button>
 
         <!-- Random Meme Button -->
@@ -81,13 +81,13 @@ function toggleSelectAll() {
           title="Wylosuj mema z bieżącej kolekcji (Ctrl + R)"
         >
           <Dices class="w-4 h-4 text-amber-400" />
-          <span>Losuj mema</span>
+          <span class="hidden xl:inline">Losuj mema</span>
         </button>
 
         <!-- Tag Matching Mode Toggle (AND vs OR) -->
         <div
           v-if="store.filter.selectedTags.length > 1"
-          class="flex items-center bg-dark-900 border border-dark-700 rounded-xl p-0.5"
+          class="flex items-center bg-dark-900 border border-dark-700 rounded-xl p-0.5 shrink-0"
         >
           <button
             @click="store.filter.tagMatchMode = 'any'"
@@ -108,11 +108,11 @@ function toggleSelectAll() {
         </div>
 
         <!-- Sort dropdown -->
-        <div class="flex items-center gap-1.5 bg-dark-900 border border-dark-700 rounded-xl px-3 py-1.5 text-xs text-dark-300">
-          <ArrowUpDown class="w-3.5 h-3.5 text-brand-400" />
+        <div class="flex items-center gap-1.5 bg-dark-900 border border-dark-700 rounded-xl px-2.5 py-1.5 text-xs text-dark-300 shrink-0">
+          <ArrowUpDown class="w-3.5 h-3.5 text-brand-400 shrink-0" />
           <select
             v-model="store.filter.sortBy"
-            class="bg-transparent text-xs text-dark-200 focus:outline-none cursor-pointer pr-2"
+            class="bg-transparent text-xs text-dark-200 focus:outline-none cursor-pointer pr-1"
           >
             <option value="date_desc" class="bg-dark-800 text-dark-100">Najnowsze</option>
             <option value="date_asc" class="bg-dark-800 text-dark-100">Najstarsze</option>
@@ -127,7 +127,7 @@ function toggleSelectAll() {
         </div>
 
         <!-- Thumbnail Size Toggle -->
-        <div class="flex items-center bg-dark-900 border border-dark-700 rounded-xl p-0.5">
+        <div class="flex items-center bg-dark-900 border border-dark-700 rounded-xl p-0.5 shrink-0">
           <button
             @click="store.settings.thumbnailSize = 'small'"
             class="p-1.5 rounded-lg text-xs transition-all"

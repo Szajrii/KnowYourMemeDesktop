@@ -41,7 +41,7 @@ function deleteTag(tagName: string) {
   >
     <div class="w-full max-w-lg bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
       <!-- Header -->
-      <div class="p-4 border-b border-dark-700 flex items-center justify-between">
+      <div class="p-4 border-b border-dark-700 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2 text-dark-100">
           <Tags class="w-5 h-5 text-brand-400" />
           <h3 class="font-bold text-sm">Zarządzanie Tagami</h3>
@@ -55,7 +55,7 @@ function deleteTag(tagName: string) {
       </div>
 
       <!-- Add New Tag Row -->
-      <div class="p-4 bg-dark-900/60 border-b border-dark-700/60 flex flex-col gap-3">
+      <div class="p-4 bg-dark-900/60 border-b border-dark-700/60 flex flex-col gap-3 shrink-0">
         <span class="text-xs font-semibold text-dark-300">Dodaj nowy tag</span>
         <div class="flex items-center gap-2">
           <input
@@ -99,7 +99,7 @@ function deleteTag(tagName: string) {
       </div>
 
       <!-- Tags List -->
-      <div class="p-4 flex-1 overflow-y-auto space-y-2">
+      <div class="p-4 flex-1 min-h-0 overflow-y-auto space-y-2">
         <div
           v-if="store.allTagsWithCount.length === 0"
           class="text-center py-8 text-xs text-dark-500"
@@ -151,7 +151,7 @@ function deleteTag(tagName: string) {
       </div>
 
       <!-- Footer -->
-      <div class="p-3 border-t border-dark-700 bg-dark-900/40 text-right">
+      <div class="p-3 border-t border-dark-700 bg-dark-900/40 text-right shrink-0">
         <button
           @click="emit('close')"
           class="px-4 py-1.5 bg-dark-700 hover:bg-dark-600 text-dark-200 rounded-lg text-xs font-semibold"

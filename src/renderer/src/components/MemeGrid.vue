@@ -20,7 +20,7 @@ const gridClass = computed(() => {
 </script>
 
 <template>
-  <main class="flex-1 overflow-y-auto p-6 relative">
+  <main class="flex-1 overflow-y-auto p-4 sm:p-6 pb-20 relative">
     <!-- Empty State: No Folders Added Yet -->
     <div
       v-if="store.folders.length === 0"

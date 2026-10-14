@@ -80,7 +80,7 @@ async function copyAndClose(meme: MemeItem) {
   >
     <div class="w-full max-w-2xl bg-dark-800 border border-brand-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col ring-1 ring-brand-500/30">
       <!-- Search Input Bar -->
-      <div class="relative flex items-center p-3.5 border-b border-dark-700 bg-dark-900/80">
+      <div class="relative flex items-center p-3.5 border-b border-dark-700 bg-dark-900/80 shrink-0">
         <Zap class="w-5 h-5 text-amber-400 ml-1.5 mr-3 shrink-0 animate-pulse" />
         <input
           ref="inputRef"
@@ -98,7 +98,7 @@ async function copyAndClose(meme: MemeItem) {
       </div>
 
       <!-- Quick Results List / Grid -->
-      <div class="max-h-[60vh] overflow-y-auto p-3 space-y-1.5">
+      <div class="max-h-[60vh] overflow-y-auto p-3 space-y-1.5 flex-1 min-h-0">
         <div v-if="results.length === 0" class="py-12 text-center text-xs text-dark-500">
           Nie znaleziono memów dla zapytania "{{ searchInput }}"
         </div>

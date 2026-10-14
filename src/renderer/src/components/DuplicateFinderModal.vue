@@ -85,7 +85,7 @@ onMounted(() => {
   >
     <div class="w-full max-w-4xl bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
       <!-- Header -->
-      <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60">
+      <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60 shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
             <Copy class="w-5 h-5" />
@@ -116,7 +116,7 @@ onMounted(() => {
       </div>
 
       <!-- Tabs -->
-      <div class="px-5 pt-2 flex items-center justify-between border-b border-dark-700 bg-dark-900/40">
+      <div class="px-5 pt-2 flex items-center justify-between border-b border-dark-700 bg-dark-900/40 shrink-0">
         <div class="flex items-center gap-2">
           <button
             @click="activeTab = 'exact'"
@@ -154,7 +154,7 @@ onMounted(() => {
       </div>
 
       <!-- Body: EXACT DUPLICATES TAB -->
-      <div v-if="activeTab === 'exact'" class="p-5 overflow-y-auto flex-1 space-y-4">
+      <div v-if="activeTab === 'exact'" class="p-5 overflow-y-auto flex-1 min-h-0 space-y-4">
         <!-- Loading state -->
         <div v-if="isLoading" class="py-16 text-center space-y-3">
           <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto" />
@@ -245,7 +245,7 @@ onMounted(() => {
       </div>
 
       <!-- Body: SIMILAR TEMPLATES TAB -->
-      <div v-else class="p-5 overflow-y-auto flex-1 space-y-4">
+      <div v-else class="p-5 overflow-y-auto flex-1 min-h-0 space-y-4">
         <!-- Empty state -->
         <div v-if="similarClusters.length === 0" class="py-16 text-center space-y-3">
           <div class="w-12 h-12 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-brand-400 flex items-center justify-center mx-auto">
@@ -348,7 +348,7 @@ onMounted(() => {
       </div>
 
       <!-- Footer -->
-      <div class="p-4 border-t border-dark-700 bg-dark-900/60 flex items-center justify-end">
+      <div class="p-4 border-t border-dark-700 bg-dark-900/60 flex items-center justify-end shrink-0">
         <button
           @click="emit('close')"
           class="px-4 py-2 bg-dark-800 hover:bg-dark-700 text-dark-300 rounded-xl text-xs font-semibold transition-colors"

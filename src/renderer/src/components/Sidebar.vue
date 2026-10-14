@@ -102,7 +102,7 @@ function setFavoritesOnly() {
 <template>
   <aside class="w-64 bg-dark-800 border-r border-dark-700/80 flex flex-col h-screen select-none shrink-0">
     <!-- App Header Branding -->
-    <div class="p-4 border-b border-dark-700/80 flex items-center justify-between">
+    <div class="p-4 border-b border-dark-700/80 flex items-center justify-between shrink-0">
       <div class="flex items-center gap-2.5">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-brand-accent flex items-center justify-center shadow-lg shadow-brand-500/20">
           <Sparkles class="w-5 h-5 text-white" />
@@ -124,7 +124,7 @@ function setFavoritesOnly() {
     </div>
 
     <!-- Navigation / Quick Filters -->
-    <div class="px-3 py-3 border-b border-dark-700/80 space-y-1">
+    <div class="px-3 py-3 border-b border-dark-700/80 space-y-1 shrink-0">
       <button
         @click="showAllMedia"
         class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-all"
@@ -229,7 +229,7 @@ function setFavoritesOnly() {
     </div>
 
     <!-- Folders Section -->
-    <div class="px-3 py-3 border-b border-dark-700/80">
+    <div class="px-3 py-3 border-b border-dark-700/80 shrink-0">
       <div class="flex items-center justify-between mb-2">
         <span class="text-[11px] font-bold tracking-wider text-dark-400 uppercase">Foldery z memami</span>
         <button
@@ -379,7 +379,7 @@ function setFavoritesOnly() {
     </div>
 
     <!-- Theme & Status Footer -->
-    <div class="p-3 border-t border-dark-700/80 bg-dark-800/80 space-y-1.5">
+    <div class="p-3 border-t border-dark-700/80 bg-dark-800/80 space-y-1.5 shrink-0">
       <!-- Duplicate Finder, OCR & Backup Tools Grid -->
       <div class="grid grid-cols-3 gap-1.5">
         <button

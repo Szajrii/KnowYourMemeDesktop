@@ -57,9 +57,9 @@ async function applyChanges() {
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
     @click.self="emit('close')"
   >
-    <div class="w-full max-w-md bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div class="w-full max-w-md bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
       <!-- Header -->
-      <div class="p-4 border-b border-dark-700 flex items-center justify-between">
+      <div class="p-4 border-b border-dark-700 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-2 text-dark-100">
           <Tags class="w-5 h-5 text-brand-400" />
           <h3 class="font-bold text-sm">Masowe Tagowanie ({{ selectedCount }} memów)</h3>
@@ -72,7 +72,7 @@ async function applyChanges() {
         </button>
       </div>
 
-      <div class="p-4 space-y-4">
+      <div class="p-4 space-y-4 flex-1 min-h-0 overflow-y-auto">
         <!-- Add Tags Section -->
         <div>
           <label class="block text-xs font-semibold text-dark-200 mb-1.5">Dodaj tagi do zaznaczonych:</label>
@@ -125,7 +125,7 @@ async function applyChanges() {
       </div>
 
       <!-- Footer -->
-      <div class="p-4 border-t border-dark-700 bg-dark-900/40 flex items-center justify-end gap-2">
+      <div class="p-4 border-t border-dark-700 bg-dark-900/40 flex items-center justify-end gap-2 shrink-0">
         <button
           @click="emit('close')"
           class="px-4 py-2 bg-dark-700 hover:bg-dark-600 text-dark-200 rounded-lg text-xs font-semibold"

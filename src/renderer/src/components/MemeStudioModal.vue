@@ -447,57 +447,59 @@ function removeTag(tag: string) {
 
     <div class="w-full max-w-5xl h-[92vh] bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
       <!-- Header -->
-      <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/70">
-        <div class="flex items-center gap-2.5">
-          <div class="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md">
+      <div class="p-3.5 sm:p-4 border-b border-dark-700 flex items-center justify-between gap-3 bg-dark-900/70 shrink-0 flex-wrap sm:flex-nowrap">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="p-2 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md shrink-0">
             <Sparkles class="w-5 h-5" />
           </div>
-          <div>
-            <h3 class="font-bold text-sm text-dark-100 flex items-center gap-2">
+          <div class="min-w-0">
+            <h3 class="font-bold text-sm text-dark-100 flex items-center gap-2 truncate">
               <span>Meme Studio & Generator</span>
-              <span class="px-2 py-0.5 text-[10px] font-extrabold uppercase rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">
+              <span class="hidden sm:inline px-2 py-0.5 text-[10px] font-extrabold uppercase rounded bg-brand-500/20 text-brand-300 border border-brand-500/30">
                 Live Studio
               </span>
             </h3>
-            <p class="text-xs text-dark-400">Dodawaj napisy, filtry, kadruj i generuj memy</p>
+            <p class="text-xs text-dark-400 truncate">Dodawaj napisy, filtry, kadruj i generuj memy</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- Load image buttons -->
           <button
             @click="triggerFileUpload"
-            class="px-3 py-1.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-dark-100 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 border border-dark-600"
+            class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-dark-100 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 border border-dark-600"
             title="Wgraj obraz z dysku komputera"
           >
-            <Upload class="w-3.5 h-3.5 text-brand-400" />
-            <span>Wgraj obraz</span>
+            <Upload class="w-3.5 h-3.5 text-brand-400 shrink-0" />
+            <span class="hidden md:inline">Wgraj obraz</span>
           </button>
 
           <button
             @click="showLibraryPicker = true"
-            class="px-3 py-1.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-dark-100 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 border border-dark-600"
+            class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-dark-100 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 border border-dark-600"
             title="Wybierz mema ze swojej biblioteki"
           >
-            <ImageIcon class="w-3.5 h-3.5 text-purple-400" />
-            <span>Z biblioteki</span>
+            <ImageIcon class="w-3.5 h-3.5 text-purple-400 shrink-0" />
+            <span class="hidden md:inline">Z biblioteki</span>
           </button>
 
           <button
             @click="copyToClipboard"
-            class="px-3.5 py-1.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-dark-100 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 border border-dark-600"
+            class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-dark-700 hover:bg-dark-600 text-dark-100 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm active:scale-95 border border-dark-600"
             title="Kopiuj gotowy obraz do schowka"
           >
-            <Copy class="w-4 h-4 text-emerald-400" />
-            <span>Kopiuj do schowka</span>
+            <Copy class="w-4 h-4 text-emerald-400 shrink-0" />
+            <span class="hidden sm:inline">Kopiuj</span>
+            <span class="hidden xl:inline"> do schowka</span>
           </button>
 
           <button
             @click="showSaveOptions = true"
-            class="px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-brand-600/30 active:scale-95"
+            class="px-3 sm:px-4 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-brand-600/30 active:scale-95"
           >
-            <Check class="w-4 h-4" />
-            <span>Zapisz w bibliotece</span>
+            <Check class="w-4 h-4 shrink-0" />
+            <span>Zapisz</span>
+            <span class="hidden sm:inline"> w bibliotece</span>
           </button>
 
           <button
@@ -510,7 +512,7 @@ function removeTag(tag: string) {
       </div>
 
       <!-- Main Workspace -->
-      <div class="flex-1 flex overflow-hidden">
+      <div class="flex-1 flex overflow-hidden min-h-0">
         <!-- Left Panel: Controls & Typography -->
         <div class="w-80 border-r border-dark-700/80 bg-dark-900/50 p-4 overflow-y-auto space-y-5 flex flex-col shrink-0">
           <!-- Image Selector Quick Bar -->

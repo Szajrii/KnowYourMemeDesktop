@@ -301,12 +301,9 @@ onUnmounted(() => {
         </div>
 
         <!-- Right Details / Management Sidebar (Fixed Width 380px) -->
-        <div class="w-[380px] shrink-0 h-full bg-dark-800 border-l border-dark-700/80 flex flex-col justify-between overflow-y-auto">
-          
-          <!-- Content Top -->
-          <div>
-            <!-- Header bar with quick actions & close button -->
-            <div class="p-4 border-b border-dark-700/80 flex items-center justify-between">
+        <div class="w-[380px] shrink-0 h-full bg-dark-800 border-l border-dark-700/80 flex flex-col overflow-hidden">
+          <!-- Header bar with quick actions & close button (Fixed Top) -->
+          <div class="p-4 border-b border-dark-700/80 flex items-center justify-between shrink-0 bg-dark-800">
               <div class="flex items-center gap-2">
                 <button
                   @click="store.toggleFavorite(meme)"
@@ -349,8 +346,10 @@ onUnmounted(() => {
               </button>
             </div>
 
-            <!-- Filename & File Info -->
-            <div class="p-4 border-b border-dark-700/80 space-y-3">
+            <!-- Scrollable Middle Section -->
+            <div class="flex-1 min-h-0 overflow-y-auto">
+              <!-- Filename & File Info -->
+              <div class="p-4 border-b border-dark-700/80 space-y-3">
               <div>
                 <div class="flex items-center justify-between">
                   <span class="text-[10px] font-bold text-brand-400 uppercase tracking-wider">Nazwa pliku</span>
@@ -661,8 +660,8 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <!-- Bottom Action Buttons -->
-          <div class="p-4 border-t border-dark-700/80 bg-dark-900/50 space-y-2">
+          <!-- Bottom Action Buttons (Fixed Bottom) -->
+          <div class="p-3.5 border-t border-dark-700/80 bg-dark-900/95 backdrop-blur-md space-y-1.5 shrink-0">
             <!-- Copy Image / Media (Primary to paste directly in Messenger/Discord) -->
             <button
               @click="store.copyMemeToClipboard(meme)"

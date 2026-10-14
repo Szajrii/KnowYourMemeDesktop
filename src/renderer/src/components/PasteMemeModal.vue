@@ -138,7 +138,7 @@ async function saveMeme() {
       >
         <div class="bg-dark-800 border border-dark-700 rounded-2xl w-full max-w-xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
           <!-- Header -->
-          <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60">
+          <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60 shrink-0">
             <div class="flex items-center gap-2.5">
               <div class="p-2 rounded-xl bg-brand-500/10 border border-brand-500/30 text-brand-400">
                 <ClipboardPaste class="w-5 h-5" />
@@ -158,9 +158,9 @@ async function saveMeme() {
           </div>
 
           <!-- Body -->
-          <div class="p-5 overflow-y-auto space-y-4 flex-1">
+          <div class="p-5 overflow-y-auto space-y-4 flex-1 min-h-0">
             <!-- Image Preview Box -->
-            <div class="w-full max-h-56 bg-dark-950/80 rounded-xl border border-dark-700/80 p-2 flex items-center justify-center overflow-hidden">
+            <div class="w-full max-h-48 sm:max-h-56 bg-dark-950/80 rounded-xl border border-dark-700/80 p-2 flex items-center justify-center overflow-hidden shrink-0">
               <img
                 :src="imageDataUrl"
                 alt="Pasted meme preview"
@@ -295,7 +295,7 @@ async function saveMeme() {
           </div>
 
           <!-- Footer -->
-          <div class="p-4 border-t border-dark-700 bg-dark-900/60 flex items-center justify-end gap-2">
+          <div class="p-4 border-t border-dark-700 bg-dark-900/60 flex items-center justify-end gap-2 shrink-0">
             <button
               @click="emit('close')"
               class="px-4 py-2 bg-dark-800 hover:bg-dark-700 text-dark-300 rounded-xl text-xs font-semibold transition-colors"

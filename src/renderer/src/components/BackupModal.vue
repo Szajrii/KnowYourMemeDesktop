@@ -55,9 +55,9 @@ async function handleImport() {
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-150"
     @click.self="emit('close')"
   >
-    <div class="w-full max-w-lg bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+    <div class="w-full max-w-lg bg-dark-800 border border-dark-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
       <!-- Header -->
-      <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60">
+      <div class="p-4 border-b border-dark-700 flex items-center justify-between bg-dark-900/60 shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="p-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400">
             <Database class="w-5 h-5" />
@@ -77,7 +77,7 @@ async function handleImport() {
       </div>
 
       <!-- Body -->
-      <div class="p-5 space-y-4 text-xs">
+      <div class="p-5 space-y-4 text-xs flex-1 min-h-0 overflow-y-auto">
         <div class="grid grid-cols-2 gap-3">
           <!-- Export Card -->
           <div class="p-4 rounded-xl bg-dark-900/80 border border-dark-700 space-y-3 flex flex-col justify-between">
@@ -133,7 +133,7 @@ async function handleImport() {
       </div>
 
       <!-- Footer -->
-      <div class="p-4 border-t border-dark-700 bg-dark-900/60 flex items-center justify-end">
+      <div class="p-4 border-t border-dark-700 bg-dark-900/60 flex items-center justify-end shrink-0">
         <button
           @click="emit('close')"
           class="px-4 py-2 bg-dark-800 hover:bg-dark-700 text-dark-300 rounded-xl text-xs font-semibold transition-colors"
